@@ -1,0 +1,52 @@
+PASS  parameter count = 15
+PASS  parameter index 0 is 'deessOn' (version hint 1)
+PASS  parameter index 1 is 'amount' (version hint 1)
+PASS  parameter index 2 is 'range' (version hint 1)
+PASS  parameter index 3 is 'focus' (version hint 1)
+PASS  parameter index 4 is 'listen' (version hint 1)
+PASS  parameter index 5 is 'heatOn' (version hint 1)
+PASS  parameter index 6 is 'mode' (version hint 1)
+PASS  parameter index 7 is 'drive' (version hint 1)
+PASS  parameter index 8 is 'guard' (version hint 1)
+PASS  parameter index 9 is 'tone' (version hint 1)
+PASS  parameter index 10 is 'mix' (version hint 1)
+PASS  parameter index 11 is 'level' (version hint 1)
+PASS  parameter index 12 is 'output' (version hint 1)
+PASS  parameter index 13 is 'os' (version hint 1)
+PASS  parameter index 14 is 'lowcut' (version hint 1)
+PASS  defaults: de-ess 50 %, tape at drive 4, 16x, LEVEL 0 dB, listen off
+PASS  default LOW CUT 30 Hz (rumble only)
+PASS  state restore: all parameter values identical
+PASS  state restore: preset name restored
+PASS  state restore: restored instance renders bit-identical audio (max diff 0)
+PASS  state restore: latency = de-esser + 8x oversampling (754 samples)
+PASS  raw-value state restore (pluginval scenario), 50 random rounds
+PASS  prepare: latency = de-esser + 16x (755)
+PASS  after switching to 4x: reported latency 751 = 751
+PASS  after switching to 2x: reported latency 743 = 743
+PASS  after switching to 8x: reported latency 754 = 754
+PASS  after switching to 16x: reported latency 755 = 755
+PASS  every sample during the switches finite and in range
+PASS  programs: 25 factory presets (20 + 5 MY VOICE)
+PASS  every program applies its values; factory presets keep LEVEL, MY VOICE presets set it
+PASS  5 MY VOICE presets set LEVEL
+PASS  'Init' program = all parameter defaults
+PASS  program change from another thread applies the values
+PASS  program change from another thread: name updated by the timer
+PASS  no third-party brand or product names in preset names or descriptions
+PASS  user preset saved (name with illegal file characters)
+PASS  user preset written to $XDG_DATA_HOME/AxellVelvet/Presets
+PASS  user preset loads
+PASS  user preset restores values and name
+PASS  A/B: each slot keeps its own settings
+PASS  A/B: copy B > A
+PASS  LEARN: no suggestion before 3 s of audio
+PASS  LEARN: suggestion = -18 - integrated (-49.76 LUFS -> LEVEL 31.76 dB)
+PASS  LEARN: applied to LEVEL
+PASS  host bypass: dry output delayed by the reported latency (error 0)
+PASS  mono layout accepted
+PASS  mono: processes (peak 0.052)
+PASS  editor: opens/closes 5x while processing (100 % size)
+PASS  editor: resizable 75-200 %, aspect locked
+PASS  editor: re-opens at the last used size (150 %)
+ALL PASS: 51 of 51 plugin checks passed

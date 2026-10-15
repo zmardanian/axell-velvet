@@ -1,0 +1,136 @@
+PASS  detector: mean probability on the sibilants @ 44.1 kHz                                                    0.8436   [0.6 .. 1]
+PASS  detector: mean probability on the vowels @ 44.1 kHz                                                       0.0123   [0 .. 0.05]
+PASS  detector: mean probability on the sibilants @ 48.0 kHz                                                    0.8296   [0.6 .. 1]
+PASS  detector: mean probability on the vowels @ 48.0 kHz                                                       0.0137   [0 .. 0.05]
+PASS  detector: mean probability on the sibilants @ 96.0 kHz                                                    0.8571   [0.6 .. 1]
+PASS  detector: mean probability on the vowels @ 96.0 kHz                                                       0.0213   [0 .. 0.05]
+PASS  exact delay (de-ess 0 %, heat off), block 1: max |out - in| @ 48.0 kHz                                    0.0000   [0 .. 0]
+PASS  exact delay (de-ess 0 %, heat off), block 37: max |out - in| @ 48.0 kHz                                   0.0000   [0 .. 0]
+PASS  exact delay (de-ess 0 %, heat off), block 512: max |out - in| @ 48.0 kHz                                  0.0000   [0 .. 0]
+PASS  exact delay (de-ess 0 %, heat off), block 4096: max |out - in| @ 48.0 kHz                                 0.0000   [0 .. 0]
+PASS  impulse peak - reported latency, tape 2x @ 48.0 kHz                                                       0.0000 smp  [0 .. 0]
+PASS  impulse peak - reported latency, tape 16x @ 48.0 kHz                                                      0.0000 smp  [0 .. 0]
+PASS  impulse peak - reported latency, console 2x @ 48.0 kHz                                                    0.0000 smp  [0 .. 0]
+PASS  impulse peak - reported latency, console 16x @ 48.0 kHz                                                   0.0000 smp  [0 .. 0]
+PASS  impulse peak - reported latency, tube 2x @ 48.0 kHz                                                       0.0000 smp  [0 .. 0]
+PASS  impulse peak - reported latency, tube 16x @ 48.0 kHz                                                      0.0000 smp  [0 .. 0]
+PASS  silence in, full drive: max |out|, mode 0 @ 48.0 kHz                                                      0.0000   [0 .. 0]
+PASS  silence in, full drive: max |out|, mode 1 @ 48.0 kHz                                                      0.0000   [0 .. 0]
+PASS  silence in, full drive: max |out|, mode 2 @ 48.0 kHz                                                      0.0000   [0 .. 0]
+PASS  NaN / Inf input: non-finite output samples @ 48.0 kHz                                                     0.0000   [0 .. 0]
+PASS  NaN / Inf input: output alive afterwards (peak) @ 48.0 kHz                                              -20.0003 dBFS  [-40 .. 0]
+PASS  block size 1 vs 512: max |difference| @ 48.0 kHz                                                          0.0000   [0 .. 1e-06]
+PASS  block size 64 vs 512: max |difference| @ 48.0 kHz                                                         0.0000   [0 .. 1e-06]
+PASS  block size 4096 vs 512: max |difference| @ 48.0 kHz                                                       0.0000   [0 .. 1e-06]
+PASS  HEAT tape drive 5: small-signal gain at 1 kHz (auto gain) @ 48.0 kHz                                      0.0073 dB  [-0.25 .. 0.25]
+PASS  HEAT tape drive 5: response at 50 Hz re 1 kHz (head bump) @ 48.0 kHz                                      0.9398 dB  [0.8 .. 1.6]
+PASS  HEAT tape drive 5: response at 70 Hz re 1 kHz (head bump) @ 48.0 kHz                                      1.4834 dB  [0.8 .. 1.6]
+PASS  HEAT tape drive 5: response at 200 Hz re 1 kHz @ 48.0 kHz                                                 0.1986 dB  [-0.5 .. 0.5]
+PASS  HEAT tape drive 5: response at 5000 Hz re 1 kHz @ 48.0 kHz                                               -0.0072 dB  [-0.5 .. 0.5]
+PASS  HEAT tape drive 5: response at 10000 Hz re 1 kHz @ 48.0 kHz                                              -0.0073 dB  [-1.3 .. 0.5]
+PASS  HEAT tape drive 5: response at 16000 Hz re 1 kHz @ 48.0 kHz                                              -0.0073 dB  [-1.3 .. 0.5]
+PASS  HEAT console drive 5: small-signal gain at 1 kHz (auto gain) @ 48.0 kHz                                  -0.0007 dB  [-0.25 .. 0.25]
+PASS  HEAT console drive 5: response at 50 Hz re 1 kHz @ 48.0 kHz                                              -0.1496 dB  [-0.5 .. 0.5]
+PASS  HEAT console drive 5: response at 70 Hz re 1 kHz @ 48.0 kHz                                              -0.0443 dB  [-0.5 .. 0.5]
+PASS  HEAT console drive 5: response at 200 Hz re 1 kHz @ 48.0 kHz                                             -0.0044 dB  [-0.5 .. 0.5]
+PASS  HEAT console drive 5: response at 5000 Hz re 1 kHz @ 48.0 kHz                                             0.0005 dB  [-0.5 .. 0.5]
+PASS  HEAT console drive 5: response at 10000 Hz re 1 kHz @ 48.0 kHz                                            0.0007 dB  [-1.3 .. 0.5]
+PASS  HEAT console drive 5: response at 16000 Hz re 1 kHz @ 48.0 kHz                                            0.0006 dB  [-1.3 .. 0.5]
+PASS  HEAT tube drive 5: small-signal gain at 1 kHz (auto gain) @ 48.0 kHz                                     -0.0040 dB  [-0.25 .. 0.25]
+PASS  HEAT tube drive 5: response at 50 Hz re 1 kHz @ 48.0 kHz                                                 -0.0842 dB  [-0.5 .. 0.5]
+PASS  HEAT tube drive 5: response at 70 Hz re 1 kHz @ 48.0 kHz                                                 -0.0092 dB  [-0.5 .. 0.5]
+PASS  HEAT tube drive 5: response at 200 Hz re 1 kHz @ 48.0 kHz                                                 0.0026 dB  [-0.5 .. 0.5]
+PASS  HEAT tube drive 5: response at 5000 Hz re 1 kHz @ 48.0 kHz                                               -0.0840 dB  [-0.5 .. 0.5]
+PASS  HEAT tube drive 5: response at 10000 Hz re 1 kHz @ 48.0 kHz                                              -0.3384 dB  [-1.3 .. 0.5]
+PASS  HEAT tube drive 5: response at 16000 Hz re 1 kHz @ 48.0 kHz                                              -0.5330 dB  [-1.3 .. 0.5]
+INFO  HEAT mode 0 THD (dB) at DRIVE 0 / 2.5 / 5 / 7.5 / 10: -80.5 -66.6 -57.1 -46.9 -34.5 @ 48.0 kHz
+PASS  HEAT mode 0: harmonics rise with every DRIVE step @ 48.0 kHz                                              1.0000   [1 .. 1]
+INFO  HEAT mode 1 THD (dB) at DRIVE 0 / 2.5 / 5 / 7.5 / 10: -62.9 -53.8 -44.8 -34.7 -27.1 @ 48.0 kHz
+PASS  HEAT mode 1: harmonics rise with every DRIVE step @ 48.0 kHz                                              1.0000   [1 .. 1]
+INFO  HEAT mode 2 THD (dB) at DRIVE 0 / 2.5 / 5 / 7.5 / 10: -62.4 -52.2 -42.3 -32.8 -26.0 @ 48.0 kHz
+PASS  HEAT mode 2: harmonics rise with every DRIVE step @ 48.0 kHz                                              1.0000   [1 .. 1]
+PASS  HEAT mode 0 16x: worst alias (at 6956 Hz), 7 kHz -6 dBFS full drive @ 48.0 kHz                         -120.4475 dBc  [-300 .. -95]
+PASS  HEAT mode 1 16x: worst alias (at 6956 Hz), 7 kHz -6 dBFS full drive @ 48.0 kHz                         -120.4505 dBc  [-300 .. -95]
+PASS  HEAT mode 2 16x: worst alias (at 6956 Hz), 7 kHz -6 dBFS full drive @ 48.0 kHz                         -120.4437 dBc  [-300 .. -95]
+PASS  DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced by @ 48.0 kHz                                            13.8232 dB  [6 .. 40]
+PASS  DE-ESS 75 %: worst change on a vowel (difference re vowel) @ 48.0 kHz                                   -76.8776 dB  [-300 .. -60]
+PASS  DE-ESS LISTEN: output + removed == input @ 48.0 kHz                                                       0.0000   [0 .. 1e-06]
+PASS  DE-ESS level independence: reduction at -44 dB minus at -14 dB @ 48.0 kHz                                 0.0058 dB  [-0.5 .. 0.5]
+PASS  S-GUARD 100 % vs 0 %: heat added to the esses lower by @ 48.0 kHz                                        20.9144 dB  [10 .. 200]
+PASS  MIX 0 % equals HEAT off: max |difference| @ 48.0 kHz                                                      0.0000   [0 .. 0]
+PASS  OUTPUT +6.02 dB doubles the signal: max |error| @ 48.0 kHz                                                0.0000   [0 .. 1e-05]
+PASS  mode switches while playing: largest sample step re the input's @ 48.0 kHz                                0.4296 x  [0 .. 1.5]
+PASS  oversampling 4x -> 16x offline: impulse at the new latency @ 48.0 kHz                                     0.0000 smp  [0 .. 0]
+PASS  LOW CUT 30 Hz: gain at the corner @ 48.0 kHz                                                             -3.0103 dB  [-3.3 .. -2.7]
+PASS  LOW CUT 30 Hz: gain at 2x the corner @ 48.0 kHz                                                          -0.0169 dB  [-0.35 .. 0]
+PASS  LOW CUT 30 Hz: gain at half the corner (24 dB/oct) @ 48.0 kHz                                           -24.0994 dB  [-26 .. -22]
+PASS  LOW CUT 60 Hz: gain at the corner @ 48.0 kHz                                                             -3.0103 dB  [-3.3 .. -2.7]
+PASS  LOW CUT 60 Hz: gain at 2x the corner @ 48.0 kHz                                                          -0.0169 dB  [-0.35 .. 0]
+PASS  LOW CUT 60 Hz: gain at half the corner (24 dB/oct) @ 48.0 kHz                                           -24.0995 dB  [-26 .. -22]
+PASS  LOW CUT 90 Hz: gain at the corner @ 48.0 kHz                                                             -3.0103 dB  [-3.3 .. -2.7]
+PASS  LOW CUT 90 Hz: gain at 2x the corner @ 48.0 kHz                                                          -0.0169 dB  [-0.35 .. 0]
+PASS  LOW CUT 90 Hz: gain at half the corner (24 dB/oct) @ 48.0 kHz                                           -24.0996 dB  [-26 .. -22]
+PASS  LOW CUT switches while playing: largest sample step re the input's @ 48.0 kHz                             0.9926 x  [0 .. 1.2]
+PASS  preset 'Init': level change (finite: yes) @ 48.0 kHz                                                     -1.4276 dB  [-3 .. 1]
+PASS  preset 'Heat Only': level change (finite: yes) @ 48.0 kHz                                                 0.0045 dB  [-3 .. 1]
+PASS  preset 'Trap Vocal - Bright & Smooth': level change (finite: yes) @ 48.0 kHz                             -1.4935 dB  [-3 .. 1]
+PASS  preset 'Doubles & Stacks': level change (finite: yes) @ 48.0 kHz                                         -1.5973 dB  [-3 .. 1]
+PASS  preset 'Pop Vocal Air': level change (finite: yes) @ 48.0 kHz                                            -0.1504 dB  [-3 .. 1]
+PASS  preset 'Belting Control': level change (finite: yes) @ 48.0 kHz                                          -1.5565 dB  [-3 .. 1]
+PASS  preset 'Lo-Fi Saturated': level change (finite: yes) @ 48.0 kHz                                          -1.3900 dB  [-3 .. 1]
+PASS  preset 'My Voice - Hard Rap Lead': level change (finite: yes) @ 48.0 kHz                                 -1.5109 dB  [-3 .. 1]
+PASS  preset 'My Voice - Dark & Intimate': level change (finite: yes) @ 48.0 kHz                               -1.4965 dB  [-3 .. 1]
+PASS  no memory allocation in process() (switches, bypass, listen)                                              0.0000 allocs  [0 .. 0]
+ALL PASS: 80 of 80 checks passed (64.3 s)
+PASS  parameter count = 15
+PASS  parameter index 0 is 'deessOn' (version hint 1)
+PASS  parameter index 1 is 'amount' (version hint 1)
+PASS  parameter index 2 is 'range' (version hint 1)
+PASS  parameter index 3 is 'focus' (version hint 1)
+PASS  parameter index 4 is 'listen' (version hint 1)
+PASS  parameter index 5 is 'heatOn' (version hint 1)
+PASS  parameter index 6 is 'mode' (version hint 1)
+PASS  parameter index 7 is 'drive' (version hint 1)
+PASS  parameter index 8 is 'guard' (version hint 1)
+PASS  parameter index 9 is 'tone' (version hint 1)
+PASS  parameter index 10 is 'mix' (version hint 1)
+PASS  parameter index 11 is 'level' (version hint 1)
+PASS  parameter index 12 is 'output' (version hint 1)
+PASS  parameter index 13 is 'os' (version hint 1)
+PASS  parameter index 14 is 'lowcut' (version hint 1)
+PASS  defaults: de-ess 50 %, tape at drive 4, 16x, LEVEL 0 dB, listen off
+PASS  default LOW CUT 30 Hz (rumble only)
+PASS  state restore: all parameter values identical
+PASS  state restore: preset name restored
+PASS  state restore: restored instance renders bit-identical audio (max diff 0)
+PASS  state restore: latency = de-esser + 8x oversampling (754 samples)
+PASS  raw-value state restore (pluginval scenario), 50 random rounds
+PASS  prepare: latency = de-esser + 16x (755)
+PASS  after switching to 4x: reported latency 751 = 751
+PASS  after switching to 2x: reported latency 743 = 743
+PASS  after switching to 8x: reported latency 754 = 754
+PASS  after switching to 16x: reported latency 755 = 755
+PASS  every sample during the switches finite and in range
+PASS  programs: 25 factory presets (20 + 5 MY VOICE)
+PASS  every program applies its values; factory presets keep LEVEL, MY VOICE presets set it
+PASS  5 MY VOICE presets set LEVEL
+PASS  'Init' program = all parameter defaults
+PASS  program change from another thread applies the values
+PASS  program change from another thread: name updated by the timer
+PASS  no third-party brand or product names in preset names or descriptions
+PASS  user preset saved (name with illegal file characters)
+PASS  user preset written to $XDG_DATA_HOME/AxellVelvet/Presets
+PASS  user preset loads
+PASS  user preset restores values and name
+PASS  A/B: each slot keeps its own settings
+PASS  A/B: copy B > A
+PASS  LEARN: no suggestion before 3 s of audio
+PASS  LEARN: suggestion = -18 - integrated (-49.76 LUFS -> LEVEL 31.76 dB)
+PASS  LEARN: applied to LEVEL
+PASS  host bypass: dry output delayed by the reported latency (error 0)
+PASS  mono layout accepted
+PASS  mono: processes (peak 0.052)
+PASS  editor: opens/closes 5x while processing (100 % size)
+PASS  editor: resizable 75-200 %, aspect locked
+PASS  editor: re-opens at the last used size (150 %)
+ALL PASS: 51 of 51 plugin checks passed
