@@ -47,6 +47,8 @@ APVTS::ParameterLayout VelvetProcessor::createLayout()
         NormalisableRange<float> (-18.0f, 18.0f, 0.1f), 0.0f, fmt (dbText)));
     p.push_back (std::make_unique<AudioParameterChoice> (ParameterID { "os", 1 }, "Oversampling", StringArray { "2x", "4x", "8x", "16x" }, 3));
     p.push_back (std::make_unique<AudioParameterChoice> (ParameterID { "lowcut", 1 }, "Low Cut", StringArray { "Off", "30 Hz", "60 Hz", "90 Hz" }, 1));
+    // 3.0: STUDIO (look-ahead, linear phase) or LIVE (zero latency, for tracking with monitoring)
+    p.push_back (std::make_unique<AudioParameterChoice> (ParameterID { "deessMode", 3 }, "De-Ess Mode", StringArray { "Studio", "Live" }, 0));
     return { p.begin(), p.end() };
 }
 
@@ -71,6 +73,7 @@ VelvetProcessor::VelvetProcessor()
     pOutput = apvts.getRawParameterValue ("output");
     pOs = apvts.getRawParameterValue ("os");
     pLowCut = apvts.getRawParameterValue ("lowcut");
+    pDeessMode = apvts.getRawParameterValue ("deessMode");
     startTimerHz (20);
 }
 
@@ -100,6 +103,7 @@ axv::Params VelvetProcessor::readParams() const
     p.outputDb = pOutput->load();
     p.osLog2 = juce::roundToInt (pOs->load()) + 1;
     p.lowCut = juce::roundToInt (pLowCut->load());
+    p.live = juce::roundToInt (pDeessMode->load()) == 1;
     return p;
 }
 
@@ -192,6 +196,7 @@ void VelvetProcessor::applyParams (const axv::Params& p, bool includeLevel)
     set ("mix", p.mixPct);
     set ("output", p.outputDb);
     set ("lowcut", (float) p.lowCut);
+    set ("deessMode", p.live ? 1.0f : 0.0f);
     if (includeLevel)
         set ("level", p.levelDb);
 }
@@ -307,17 +312,18 @@ void VelvetProcessor::applyLearn()
 // APVTS::replaceState skips a parameter whose snapped value already matches; re-apply explicitly (pluginval scenario)
 void VelvetProcessor::restoreTree (const juce::ValueTree& tree)
 {
+    const auto saved = tree.createCopy(); // what the state itself holds (replaceState may add the missing parameters)
     apvts.replaceState (tree);
     for (auto* p : getParameters())
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (p))
         {
-            const auto child = apvts.state.getChildWithProperty ("id", rp->paramID);
-            if (child.isValid() && child.hasProperty ("value"))
-            {
-                const float norm = rp->convertTo0to1 ((float) child.getProperty ("value"));
-                if (std::abs (rp->getValue() - norm) > 1.0e-6f)
-                    rp->setValueNotifyingHost (norm);
-            }
+            const auto child = saved.getChildWithProperty ("id", rp->paramID);
+            // a parameter the saved state does not know (saved by an older version) takes its default: a 1.0 project
+            // opens with the STUDIO de-esser, whatever the instance had before
+            const float norm = child.isValid() && child.hasProperty ("value") ? rp->convertTo0to1 ((float) child.getProperty ("value"))
+                                                                               : rp->getDefaultValue();
+            if (std::abs (rp->getValue() - norm) > 1.0e-6f)
+                rp->setValueNotifyingHost (norm);
         }
 }
 

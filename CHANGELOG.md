@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.0.0 - 2026-10-25
+(There is no 2.0: that work was research only - see the next entry.)
+- **LIVE de-esser - zero latency.** A De-Ess Mode switch: STUDIO (as before, for mixing) or LIVE, for recording while
+  you hear yourself through the plugin. LIVE has its own causal detector network and cuts with the same magnitude as
+  STUDIO, made minimum phase every 2 ms. With HEAT off Velvet then adds no latency at all; with HEAT on, the
+  oversampler's 1.7 ms. Bit-exact pass-through when there is nothing to cut. (DECISIONS V20)
+- **Detector trained on 111 voices** instead of three: CMU ARCTIC plus 108 VCTK voices from many accents (phone labels by
+  the Montreal Forced Aligner). On 12 accents it never heard: F1 0.82 (1.0: 0.72), 97 % of the sibilant energy caught
+  (1.0: 92 %). On the artist's own takes it leaves half as many harsh esses uncut. (V19)
+- **Benchmarked against a third-party de-esser** (Sibalance) and the classic designs on 15 unseen voices: 30-80x less
+  change on vowels than Sibalance at the same harsh-ess removal. (V21)
+- **192 kHz** verified for everything (detectors, both de-essers, HEAT, presets, the audit). (V22)
+- **Three TRACKING presets** (LIVE): Tracking - De-Ess Only, Tracking - Warm Monitor, My Voice - Tracking (Live).
+- Older projects open with the STUDIO de-esser and their saved settings: parameters a saved state does not contain take
+  their defaults. (V23)
+- Tests: DSP 467 checks (44.1-192 kHz, STUDIO and LIVE), plugin 58, independent audit 54, ASan/UBSan/LSan clean,
+  pluginval strictness 10, VST3 validator 47/47.
+- Test fixes found on the way: the synthetic test voice's esses grew 3 dB per sample-rate doubling (now the same level
+  at every rate); TUBE's 35 kHz plate pole delays an impulse peak by 4.5 us (0.9 sample at 192 kHz) - the latency
+  itself is exact.
+
 ## Research after 1.0.0 (no change to the plugin)
 - Romanian detector retrain studied and not adopted (DECISIONS V17): 1.0's detector stays.
 - De-plosive studied and not built (DECISIONS V18): on real takes it does not beat LOW CUT 90, which remains the

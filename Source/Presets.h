@@ -2,7 +2,7 @@
 // Axell Velvet - factory presets (framework independent: the test suite renders and checks every one).
 // Factory presets keep LEVEL (it belongs to the recording; set it with LEARN). The MY VOICE set is made for Axell's own
 // voice and recording chain (a large-diaphragm condenser into an interface preamp with a FET-style compressor), measured
-// from his dry vocal: it also sets LEVEL to that recording level. Names describe the use; no third-party branding.
+// from that dry vocal: it also sets LEVEL to that recording level. Names describe the use; no third-party branding.
 #include "Engine.h"
 
 #include <array>
@@ -41,13 +41,16 @@ inline Params makeParams (float amount, float range, int focus, bool heat, int m
     return p;
 }
 
-constexpr int kNumFactoryPresets = 25;
+constexpr int kNumFactoryPresets = 28;
 
 inline std::array<FactoryPreset, kNumFactoryPresets> factoryPresets()
 {
     // MY VOICE: LEVEL for the measured recording level, LOW CUT 90 Hz (the dry vocal carries strong rumble below 20 Hz,
     // only 16.5 dB under the voice; the voice itself sits at 131-187 Hz)
     auto mine = [] (Params p) { p.levelDb = kMyVoiceLevelDb; p.lowCut = 3; return p; };
+    // TRACKING: the LIVE de-esser (zero latency) for recording while monitoring through the plugin; with HEAT the
+    // oversampler adds 1.7 ms at 44.1 / 48 kHz (0.4 ms at 96 kHz)
+    auto live = [] (Params p) { p.live = true; return p; };
     return { {
         // ESSENTIALS
         { "ESSENTIALS", "Init", "Smart de-essing at 50 % and warm tape at drive 4.", makeParams (50, 18, 0, true, kTape, 4.0f, 60, 0, 100) },
@@ -79,6 +82,11 @@ inline std::array<FactoryPreset, kNumFactoryPresets> factoryPresets()
           makeParams (80, 24, 0, true, kTape, 3.0f, 100, -30, 100) },
         { "SPECIAL", "Lo-Fi Saturated", "Heavily driven tube with a dark top for a vintage, lo-fi colour.", makeParams (40, 18, 0, true, kTube, 9.0f, 60, -45, 100) },
         { "SPECIAL", "Parallel Crunch", "Full console crunch blended under the clean vocal: energy with clarity.", makeParams (50, 18, 0, true, kConsole, 9.0f, 70, 0, 35) },
+        // TRACKING (LIVE)
+        { "TRACKING (LIVE)", "Tracking - De-Ess Only", "Zero latency: the LIVE de-esser for recording while you hear yourself, nothing else.",
+          live (makeParams (50, 18, 0, false, kTape, 4.0f, 60, 0, 100)) },
+        { "TRACKING (LIVE)", "Tracking - Warm Monitor", "LIVE de-esser plus light tape for a confident headphone mix (1.7 ms at 48 kHz).",
+          live (makeParams (50, 18, 0, true, kTape, 3.0f, 70, 0, 100)) },
         // MY VOICE (sets LEVEL)
         { "MY VOICE", "My Voice - Everyday Lead", "Made for Axell's voice and chain: both ess families (s at 8.7 kHz, sh at 3.3 kHz) controlled, warm tape, a touch darker.",
           mine (makeParams (55, 18, 0, true, kTape, 4.5f, 75, -10, 100)), true },
@@ -88,6 +96,8 @@ inline std::array<FactoryPreset, kNumFactoryPresets> factoryPresets()
           mine (makeParams (55, 18, 0, true, kTube, 4.5f, 90, 5, 100)), true },
         { "MY VOICE", "My Voice - Doubles & Ad-libs", "Axell's chain, stacked layers: strong de-essing and darker tape so the stack never hisses.",
           mine (makeParams (70, 21, 0, true, kTape, 6.0f, 90, -20, 90)), true },
+        { "MY VOICE", "My Voice - Tracking (Live)", "Axell's chain while recording: the LIVE de-esser on both ess families and light tape, 1.7 ms at 48 kHz.",
+          live (mine (makeParams (55, 18, 0, true, kTape, 3.5f, 75, -10, 100))), true },
         { "MY VOICE", "My Voice - Dark & Intimate", "Axell's chain, close and quiet parts: gentle tube, darker top, soft esses.",
           mine (makeParams (50, 15, 0, true, kTube, 3.5f, 80, -30, 100)), true },
     } };

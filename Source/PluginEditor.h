@@ -78,6 +78,7 @@ private:
     SibilanceView sibView;
     ui::Knob amount { "AMOUNT", ui::col::teal, 132 }, range { "RANGE", ui::col::teal, 62 };
     ui::Segmented focus { { "AUTO", "S", "SH" }, ui::col::teal };
+    ui::Segmented deessMode { { "STUDIO", "LIVE" }, ui::col::teal };
     ui::Toggle listen { "LISTEN", ui::col::warn, "pill" };
 
     ui::Segmented mode { { "TAPE", "CONSOLE", "TUBE" }, ui::col::accent };

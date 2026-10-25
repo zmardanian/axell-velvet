@@ -10,11 +10,16 @@ S-GUARD keeps the warmth off the esses, so the saturation never makes them harsh
 
 **DE-ESS** is a one-knob de-esser. **AMOUNT** sets how far the esses come down. There is no threshold: the same
 setting works on a quiet verse and a loud chorus, at any recording level.
-- **Detection:** a small neural network trained on labelled speech recognises s, z, sh, zh, ch and j by their sound
-  (noisiness, spectral shape, how long the noise lasts). It is not a treble meter.
+- **Detection:** a small neural network trained on 111 voices of labelled speech (many accents) recognises s, z, sh,
+  zh, ch and j by their sound (noisiness, spectral shape, how long the noise lasts). It is not a treble meter.
 - **Cut:** only the frequencies where each ess is harsh are lowered. An "s" whistling at 8.7 kHz is cut at 8.7 kHz,
   a "sh" at 3.3 kHz at 3.3 kHz. Vowels, "t" bursts and hi-hat bleed are left alone.
-- **Precision:** ten linear-phase bands with 2 ms look-ahead. With nothing to cut, the output is the input bit for bit.
+- **STUDIO / LIVE:**
+  - STUDIO (default, for mixing): ten linear-phase bands with 4 ms look-ahead; 14 ms latency, compensated by the host.
+  - LIVE (for recording while you hear yourself through the plugin): zero latency. A causal detector with its own
+    network, and the same cut made minimum phase. With HEAT off the plugin adds no latency at all; with HEAT on, the
+    oversampler's 1.7 ms (0.4 ms at 96 kHz).
+  - In both, with nothing to cut the output is the input bit for bit.
 - **More controls:**
   - RANGE: the most any band may be cut.
   - FOCUS: Auto / S / SH.
@@ -44,44 +49,49 @@ Each model has these controls:
   the voice with it. The default 30 Hz takes only what you can't hear.
 - **OUTPUT**, oversampling 2x-16x, A/B, user presets.
 
-There are 25 factory presets in five groups:
+There are 28 factory presets in six groups:
 - Essentials
 - Rap & Hip-Hop
 - Singing
 - Special
-- MY VOICE: five presets made on Axell's own voice and recording chain (a large-diaphragm condenser into an
-  interface preamp with a FET compressor). They also set LEVEL and a 90 Hz low cut for that chain.
+- Tracking (Live): the LIVE de-esser for recording, alone or with light tape.
+- MY VOICE: six presets made on Axell's own voice and recording chain (a large-diaphragm condenser into an
+  interface preamp with a FET compressor), one of them for tracking. They also set LEVEL and a 90 Hz low cut for
+  that chain.
 
 ## Measured quality
 
 | | |
 |---|---|
-| Nothing to do (de-ess 0 %, heat off, low cut off) | output = input delayed by the reported latency, bit for bit (44.1 / 48 / 96 kHz, any block size) |
+| Nothing to do (de-ess 0 %, heat off, low cut off) | STUDIO: output = input delayed by the reported latency, bit for bit; LIVE: output = input, no delay (44.1 / 48 / 96 / 192 kHz, any block size) |
 | Silence in, full drive | exactly silence out |
-| De-esser vs the classic designs, on voices it never trained on, at equal harsh-ess removal | 10-30x less change on vowels, 2-10x less on t/k/p, 1.5-3x less cut on already-soft esses; at 100 % it leaves fewer harsh esses than either classic design reaches at any setting |
-| Detector | rate independent (44.1-96 kHz) and level independent (-44 vs -14 dBFS: reduction within 0.5 dB) |
+| De-esser vs a third-party sibilance-aware de-esser (Sibalance, 20 ms look-ahead), 15 voices it never trained on, at equal harsh-ess removal | 30-80x less change on vowels, 7-11x less on t/k/p, 5-12x less taken from already-soft esses; LIVE (zero latency) still 20-40x less on vowels |
+| De-esser vs the classic designs, same test | 25-40x less change on vowels, 4-8x less on t/k/p, 3-8x less taken from already-soft esses |
+| The artist's own 12 takes (rap, English and Romanian; no model saw them) | harsh esses left uncut at AMOUNT 50: 1.0 16, 3.0 8, 3.0 LIVE 6; vowels changed by 0.006 dB on average |
+| LIVE vs STUDIO | the same cut shape (minimum phase vs linear phase); at equal harshness 2-3x STUDIO's (tiny) vowel change: 0.008 vs 0.003 dB |
+| Detector | 111 training voices; held out: F1 0.82 (1.0: 0.72) on 12 accents it never heard; rate independent (44.1-192 kHz) and level independent (-44 vs -14 dBFS: reduction within 0.5 dB) |
 | HEAT aliasing, 7 kHz at -6 dBFS, full drive | ≤ -95 dBc at 16x (tape -120 dBc) |
 | HEAT aliasing at equal saturation (3 % THD) vs certified UAD plugins | Velvet tape -108 / console -129 / tube -113 dBc; UADx Oxide -96, 610-B -89, Century -79, 610-A -70 dBc |
 | Auto gain | small-signal gain 0 ± 0.25 dB in every model; every preset keeps the vocal's level within 0.5 dB |
-| Latency | 755 samples at 48 kHz (15.7 ms; the de-esser's look-ahead), reported exactly, changes only after the host was told |
+| Latency | STUDIO 755 samples at 48 kHz (15.7 ms; the de-esser's look-ahead); LIVE 83 (1.7 ms, the HEAT oversampler) or 0 with HEAT off; reported exactly, changes only after the host was told |
 | CPU (48 kHz stereo, one core, 16x) | tape ≈ 8-10 %, console ≈ 6 %, tube ≈ 5 % (8x: 8 / 4 / 3.4 %) |
 | Real-time safety | no allocation, lock or I/O in the audio path (allocation counter in the test suite) |
 
 All of these come from:
-- the automated suites: `tests/`, 289 DSP checks at 44.1 / 48 / 96 kHz plus 51 plugin checks;
-- an independent black-box audit through a VST3 host (`tests/independent/velvet_audit.py`, 37 checks, signals and
+- the automated suites: `tests/`, 467 DSP checks at 44.1 / 48 / 96 / 192 kHz (STUDIO and LIVE) plus 58 plugin checks;
+- an independent black-box audit through a VST3 host (`tests/independent/velvet_audit.py`, 54 checks, signals and
   analysis from textbook definitions);
 - AddressSanitizer + UBSan;
 - pluginval at strictness 10;
 - Steinberg's VST3 validator (47/47).
 
-The benchmarks are in `research/` (`bench_cpp.py`, `uad_bench.py`). The reasoning behind every design choice, with
+The benchmarks are in `research/` (`bench3.py`, `realtakes3.py`, `bench_cpp.py`, `uad_bench.py`). The reasoning behind every design choice, with
 what was tried and rejected, is in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Install (Linux)
 
-    tar xzf AxellVelvet-1.0.0-linux-x86_64.tar.gz
-    cd AxellVelvet-1.0.0-linux-x86_64
+    tar xzf AxellVelvet-3.0.0-linux-x86_64.tar.gz
+    cd AxellVelvet-3.0.0-linux-x86_64
     ./install.sh
 
 The installer copies `Axell Velvet.vst3` to `~/.vst3`. Then in REAPER: Options > Preferences > Plug-ins > VST >
@@ -106,5 +116,5 @@ does not depend on level).
 
 Axell Yobag - axellpetre@protonmail.com (questions, bug reports, feedback). Issues on GitHub are welcome too.
 
-Licence: GNU AGPLv3 (`LICENSE`); third-party components and the CMU ARCTIC notice (training data of the detector) in
-`THIRD_PARTY_NOTICES.md`. No code, data or graphics of any commercial product are used.
+Licence: GNU AGPLv3 (`LICENSE`); third-party components and the CMU ARCTIC and VCTK notices (training data of the
+detectors) in `THIRD_PARTY_NOTICES.md`. No code, data or graphics of any commercial product are used.

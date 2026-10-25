@@ -1,11 +1,13 @@
 // Axell Velvet - offline de-esser render (research / benchmarks): VelvetDeEss in.wav out.wav [amount] [range] [focus] [listen]
-// Output is latency-compensated (same length and alignment as the input). Optional 5th arg: per-frame CSV (t, p, grDb).
+// Output is latency-compensated (same length and alignment as the input). Optional 7th arg: per-frame CSV (t, p, grDb);
+// --live anywhere: the LIVE de-esser (zero latency).
 #include "../Source/Sibilance.h"
 #include "WavIO.h"
 
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
 int main (int argc, char** argv)
 {
@@ -27,8 +29,11 @@ int main (int argc, char** argv)
     if (argc > 6) p.listen = std::atoi (argv[6]) != 0;
     FILE* csv = argc > 7 && argv[7][0] != '-' ? std::fopen (argv[7], "w") : nullptr;
     const int nch = std::min<int> (2, (int) a.ch.size());
+    bool live = false;
+    for (int i = 3; i < argc; ++i)
+        live = live || std::string (argv[i]) == "--live";
     axv::DeEsser d;
-    d.prepare (a.fs, nch);
+    d.prepare (a.fs, nch, live ? axv::DetectorConfig::live() : axv::DetectorConfig {});
     d.setParams (p);
     const int lat = d.latency();
     const size_t n = a.frames(), total = n + (size_t) lat;

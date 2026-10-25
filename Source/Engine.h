@@ -3,7 +3,8 @@
 //
 //   in -> sanitize -> [dry ring: bypass, aligned to the full latency]
 //      -> LOW CUT (24 dB/oct Butterworth: subsonic rumble would otherwise intermodulate with the voice in the models)
-//      -> DE-ESS (sibilance detector + water-filling band gains, linear phase; latency DeEsser::latency())
+//      -> DE-ESS (sibilance detector + water-filling band gains; STUDIO: linear phase with look-ahead, latency
+//         DeEsser::latency(); LIVE: causal detector + minimum-phase bells, zero latency)
 //      -> HEAT: pre gain (LEVEL + DRIVE) -> upsample 2x..16x -> TAPE / CONSOLE / TUBE -> downsample -> post gain
 //               (exact inverse, delayed by the oversampler) -> MIX with the de-essed signal (delayed alike), the heat
 //               faded out on sibilants by S-GUARD -> TONE (high shelf)
@@ -43,6 +44,7 @@ struct Params
     float rangeDb = 18.0f;     // maximum cut per band, 3..30 dB
     int focus = 0;             // 0 auto, 1 S (5.6 kHz up), 2 SH (below 5.6 kHz)
     bool listen = false;       // hear what the de-esser removes
+    bool live = false;         // LIVE de-esser: zero latency (tracking with monitoring); STUDIO: look-ahead, linear phase
     // HEAT
     bool heatOn = true;
     int mode = kTape;
@@ -101,6 +103,7 @@ public:
         numCh = std::clamp (numChannels, 1, kMaxCh);
         maxBlock = std::max (0, maxBlockSize);
         deess.prepare (fs, numCh);
+        deessLive.prepare (fs, numCh, DetectorConfig::live());
         os.prepare (kChunk, fs, false);
         int maxOs = 0;
         for (int k = 1; k <= Oversampler::kMaxFactorLog2; ++k)
@@ -138,6 +141,7 @@ public:
             applyConfig();
         }
         deess.reset();
+        deessLive.reset();
         os.reset();
         resetModels();
         for (auto& r : dryRing)
@@ -152,7 +156,7 @@ public:
         heatRunning = false;
         outGain = outTarget;
         mixAmt = mixTarget;
-        heatAmt = heatTarget;
+        heatAmt = active.heat ? heatTarget : 0.0f;
         bypassAmt = bypassTarget;
         toneDbNow = toneDbTarget;
         tone.reset();
@@ -177,6 +181,11 @@ public:
         d.focus = std::clamp (p.focus, 0, 2);
         d.listen = p.listen && p.deessOn;
         deess.setParams (d);
+        deessLive.setParams (d);
+        want.live = p.live;
+        // the oversampler's delay is part of the timing except in LIVE with HEAT off (then the plugin has no latency at
+        // all; switching HEAT in LIVE is a latency change, handled like an oversampling change)
+        want.heat = p.heatOn || ! p.live;
         wantMode = std::clamp (p.mode, 0, kNumModes - 1);
         driveDbTarget = driveToDb (wantMode, p.drive);
         levelDbTarget = std::clamp (p.levelDb, -24.0f, 36.0f);
@@ -193,11 +202,15 @@ public:
     struct Config
     {
         int osLog2 = 3;
-        bool operator== (const Config& o) const noexcept { return osLog2 == o.osLog2; }
+        bool live = false, heat = true;
+        bool operator== (const Config& o) const noexcept { return osLog2 == o.osLog2 && live == o.live && heat == o.heat; }
         bool operator!= (const Config& o) const noexcept { return ! (*this == o); }
     };
 
-    int latencyOf (const Config& c) const noexcept { return deess.latency() + os.latencyFor (c.osLog2); }
+    int latencyOf (const Config& c) const noexcept
+    {
+        return (c.live ? deessLive.latency() : deess.latency()) + (c.heat ? os.latencyFor (c.osLog2) : 0);
+    }
     int getLatencySamples() const noexcept { return latencyPub.load (std::memory_order_acquire); }
     LatencyHandshake& handshake() noexcept { return hs; }
     const LoudnessMeter& inputLoudness() const noexcept { return inMeter; }
@@ -229,6 +242,8 @@ public:
     }
 
 private:
+    DeEsser& activeDeEss() noexcept { return active.live ? deessLive : deess; }
+
     void resetModels() noexcept
     {
         headBump.resetState();
@@ -257,6 +272,11 @@ private:
             fadeTgt = 0.0f;
             if (fadeGain <= 0.0f && ready)
             {
+                if (tgt.live != active.live)
+                {
+                    deess.reset(); // the de-esser that takes over starts from rest (behind the structural fade)
+                    deessLive.reset();
+                }
                 active = tgt;
                 applyConfig();
                 warm = latency + (hs.tracking() ? maxBlock : 0);
@@ -330,13 +350,13 @@ private:
         if (lowCutFade > 0.0f)
             lowCutFade = std::max (0.0f, lowCutFade - (float) n * fadeStepLc);
 
-        // 1. de-esser (always running: constant latency; amount 0 = an exact delay)
-        deess.process (io, nCh, n, sib.data());
+        // 1. de-esser (always running: constant latency; amount 0 = an exact delay, LIVE: the input itself)
+        activeDeEss().process (io, nCh, n, sib.data());
 
         // 2. HEAT. A mode change crossfades to the de-essed signal and back (the model starts from rest).
         const bool modeSwitch = wantMode != mode;
-        const float heatGoal = modeSwitch ? 0.0f : heatTarget;
-        const int log2 = active.osLog2, factor = 1 << log2, Los = os.latencyFor (log2);
+        const float heatGoal = modeSwitch || ! active.heat ? 0.0f : heatTarget;
+        const int log2 = active.osLog2, factor = 1 << log2, Los = active.heat ? os.latencyFor (log2) : 0;
         const bool runHeat = heatAmt > 0.0f || heatGoal > 0.0f;
         // pre gain per sample (dB smoothed; S-GUARD lowers the drive on sibilants), its inverse delayed by Los
         if (runHeat && ! heatRunning)
@@ -445,7 +465,7 @@ private:
     void pushDisplay() noexcept
     {
         auto db = [] (float a) { return a > 1.0e-6f ? 20.0f * std::log10 (a) : -120.0f; };
-        const auto& d = deess.display();
+        const auto& d = activeDeEss().display();
         DisplayFrame f;
         f.p = d.p;
         f.hfReBodyDb = d.hfReBodyDb;
@@ -500,7 +520,7 @@ private:
     int mode = kTape, wantMode = kTape;
     Params params;
     Config active, want;
-    DeEsser deess;
+    DeEsser deess, deessLive;
     Oversampler os;
     TapeModel tape;
     ConsoleModel console;

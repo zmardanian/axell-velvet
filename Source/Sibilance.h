@@ -17,6 +17,9 @@
 // the onset) and release in 12 ms. They are applied with ten complementary linear-phase bands (Kaiser FIR,
 // sum = a pure delay): one composite FIR per hop, crossfaded sample by sample. With no reduction the output is the
 // input delayed by latency(), bit for bit.
+// LIVE (DetectorConfig::live()): a causal detector (its own network) and no look-ahead; the same water-filling gains
+// become a minimum-phase filter with STUDIO's magnitude (real cepstrum), so the plugin adds no latency. Bit for bit the
+// input when there is nothing to cut.
 //
 // Real-time safety: prepare() allocates; push() / process() never allocate, lock or throw.
 #include <axell/dsp/Fft.h>
@@ -34,6 +37,11 @@
 #else
  #include "DetectorModel.h"
 #endif
+#ifdef AXV_LIVE_MODEL_HEADER
+ #include AXV_LIVE_MODEL_HEADER
+#else
+ #include "DetectorModelLive.h"
+#endif
 
 namespace axv
 {
@@ -46,6 +54,17 @@ constexpr int kCtxIdx[kNumCtx] = { 0, 1, 9, 10, 11 };
 constexpr int kCtxFrames = 24;
 constexpr int kNumDesign = kNumBase + kNumCtx;
 static_assert (kNumDesign == model::kInputs, "DetectorModel.h does not match the detector");
+static_assert (kNumDesign == model_live::kInputs, "DetectorModelLive.h does not match the detector");
+
+// a network's weights (the studio and the LIVE detector have one each)
+struct ModelRef
+{
+    int hidden;
+    const float *mu, *sd, *w1, *b1, *w2;
+    float b2;
+};
+inline constexpr ModelRef kStudioModel { model::kHidden, model::kMu, model::kSd, model::kW1, model::kB1, model::kW2, model::kB2 };
+inline constexpr ModelRef kLiveModel { model_live::kHidden, model_live::kMu, model_live::kSd, model_live::kW1, model_live::kB1, model_live::kW2, model_live::kB2 };
 constexpr int kNumBands = 10;  // de-esser bands
 constexpr double kEdges[kNumBands + 1] = { 2000, 2800, 3600, 4500, 5600, 7000, 8500, 10000, 12000, 14500, 17000 };
 constexpr double kFeatBands[6][2] = { { 1500, 2500 }, { 2500, 3500 }, { 3500, 5000 }, { 5000, 7000 }, { 7000, 10000 }, { 10000, 14000 } };
@@ -54,8 +73,18 @@ constexpr int kFocusSplit = 4; // FOCUS S: bands 4.. (5.6 kHz up); FOCUS SH: ban
 struct DetectorConfig
 {
     double winMs = 12.0, hopMs = 2.0;
-    int smooth = 2;                    // feature smoothing +-hops
+    int smooth = 2;                    // feature smoothing +-hops (causal: the past 2 * smooth + 1 frames)
     double yinFmin = 70.0, yinFmax = 500.0, yinThresh = 0.15;
+    // LIVE: every frame is reported as soon as its window is complete, features are smoothed over the past only, and
+    // the LIVE network (trained on exactly these features) decides
+    bool causal = false;
+    static DetectorConfig live() noexcept
+    {
+        DetectorConfig c;
+        c.causal = true;
+        c.smooth = 1;
+        return c;
+    }
 };
 
 struct DetFrame
@@ -93,6 +122,7 @@ public:
     {
         fs = sampleRate;
         cfg = c;
+        net = cfg.causal ? &kLiveModel : &kStudioModel;
         hop = std::max (1, (int) std::lround (cfg.hopMs * 0.001 * fs));
         win = std::max (16, (int) std::lround (cfg.winMs * 0.001 * fs));
         nfft = 16;
@@ -171,7 +201,8 @@ public:
     int smoothing() const noexcept { return cfg.smooth; }
     double sampleRate() const noexcept { return fs; }
     // samples from the newest input to the centre of the frame push() returns
-    int frameDelay() const noexcept { return win / 2 + cfg.smooth * hop; }
+    int frameDelay() const noexcept { return win / 2 + (cfg.causal ? 0 : cfg.smooth * hop); }
+    bool causal() const noexcept { return cfg.causal; }
 
     // feed one mono sample; true when out() holds a new frame (centre = newest - frameDelay())
     bool push (float x) noexcept
@@ -190,24 +221,24 @@ public:
             return false;
         hopCount = 0;
         analyse();
-        return frames > cfg.smooth;
+        return frames > (cfg.causal ? 0 : cfg.smooth);
     }
 
     const DetFrame& out() const noexcept { return result; }
 
-    // the network on the design vector
-    static float probability (const float* x) noexcept
+    // a network on the design vector
+    static float probability (const float* x, const ModelRef& m = kStudioModel) noexcept
     {
         float z[kNumDesign];
         for (int i = 0; i < kNumDesign; ++i)
-            z[i] = (x[i] - model::kMu[i]) / model::kSd[i];
-        float o = model::kB2;
-        for (int j = 0; j < model::kHidden; ++j)
+            z[i] = (x[i] - m.mu[i]) / m.sd[i];
+        float o = m.b2;
+        for (int j = 0; j < m.hidden; ++j)
         {
-            float a = model::kB1[j];
+            float a = m.b1[j];
             for (int i = 0; i < kNumDesign; ++i)
-                a += z[i] * model::kW1[i * model::kHidden + j];
-            o += model::kW2[j] * std::tanh (a);
+                a += z[i] * m.w1[i * m.hidden + j];
+            o += m.w2[j] * std::tanh (a);
         }
         o = std::clamp (o, -30.0f, 30.0f);
         return 1.0f / (1.0f + std::exp (-o));
@@ -369,9 +400,10 @@ private:
         histPos = (histPos + 1) % H;
         histCount = std::min (histCount + 1, H);
         ++frames;
-        if (frames <= cfg.smooth)
+        if (! cfg.causal && frames <= cfg.smooth)
             return;
-        const Raw& mid = hist[(size_t) ((histPos - 1 - cfg.smooth + 2 * H) % H)];
+        // centred: the frame `smooth` hops back, smoothed over +-smooth; causal: the newest, smoothed over the past
+        const Raw& mid = hist[(size_t) ((histPos - 1 - (cfg.causal ? 0 : cfg.smooth) + 2 * H) % H)];
         DetFrame& o = result;
         o.center = mid.center;
         for (int i = 0; i < kNumFeat; ++i)
@@ -418,11 +450,12 @@ private:
                 sum += ctx[(size_t) k][(size_t) i];
             x[kNumBase + i] = sum / (float) ctxCount;
         }
-        o.p = probability (x);
+        o.p = probability (x, *net);
     }
 
     double fs = 48000.0, fd = 8000.0;
     DetectorConfig cfg;
+    const ModelRef* net = &kStudioModel;
     int hop = 96, win = 576, nfft = 1024, ringSize = 1024, dec = 6, yW = 96, yTmax = 115, yTmin = 16, dRingSize = 256;
     RealFft fft;
     std::vector<float> window, frameIn, spec, power, ring, dRing;
@@ -479,10 +512,13 @@ public:
         numCh = std::clamp (numChannels, 1, kMaxCh);
         det.prepare (fs, c);
         hop = det.hopSize();
-        delay = det.frameDelay() + kLook * hop;
+        live = c.causal;
+        // LIVE: no delay at all - the gains of the newest frame act on the newest sample, through a minimum-phase filter
+        delay = live ? 0 : det.frameDelay() + kLook * hop;
         designBank();
+        designMinPhase();
         ringSize = 1;
-        while (ringSize < delay + half + hop + 4)
+        while (ringSize < (live ? taps : delay + half) + hop + 4)
             ringSize <<= 1;
         for (auto& r : ring)
             r.assign ((size_t) (2 * ringSize), 0.0f);
@@ -519,6 +555,7 @@ public:
     }
 
     int latency() const noexcept { return delay; }
+    bool isLive() const noexcept { return live; }
     int firTaps() const noexcept { return taps; }
     const SibilanceDetector& detector() const noexcept { return det; }
     void setParams (const DeEssParams& p) noexcept { params = p; }
@@ -548,6 +585,32 @@ public:
             {
                 update (det.out());
                 newFrame = true;
+            }
+            if (live)
+            {
+                // LIVE: the newest sample through the minimum-phase filter (the newest taps samples), crossfaded from the
+                // previous hop's filter like STUDIO's; with nothing to cut the sample passes untouched, bit for bit
+                const int start = (wpos - taps + 1 + ringSize) & (ringSize - 1);
+                const float w = std::min (1.0f, (float) (ramp + 1) / (float) hop);
+                for (int c = 0; c < nch; ++c)
+                {
+                    const float* xw = ring[(size_t) c].data() + start;
+                    const float x0 = ring[(size_t) c][(size_t) wpos];
+                    float y = x0;
+                    if (! (oldIdentity && newIdentity))
+                    {
+                        const float yo = oldIdentity ? x0 : dot (hOld.data(), xw);
+                        const float yn = newIdentity ? x0 : dot (hNew.data(), xw);
+                        y = w < 1.0f ? yo + (yn - yo) * w : yn;
+                    }
+                    io[c][i] = params.listen ? x0 - y : y;
+                }
+                if (sibOut != nullptr)
+                    sibOut[i] = pPrev + (pApplied - pPrev) * w;
+                if (ramp < hop)
+                    ++ramp;
+                wpos = (wpos + 1) & (ringSize - 1);
+                continue;
             }
             // output time t = newest - delay; FIR window [t - half, t + half]
             const int t = (wpos - delay + ringSize) & (ringSize - 1);
@@ -617,6 +680,63 @@ private:
             for (int i = 0; i < taps; ++i)
                 bank[(size_t) b][(size_t) i] = (float) (lps[(size_t) b + 1][(size_t) i] - lps[(size_t) b][(size_t) i]);
         }
+    }
+
+    // LIVE: the same magnitude as STUDIO's composite FIR, made minimum phase (real cepstrum, Oppenheim & Schafer):
+    // causal, no delay, the energy at the front. bamp[b][k] = the amplitude of band b's linear-phase FIR on an
+    // mN-point grid; per hop log|H| -> cepstrum -> fold -> exp -> the filter, stored time-reversed for dot().
+    void designMinPhase()
+    {
+        mN = 512;
+        while (mN < 8 * taps)
+            mN <<= 1;
+        mfft.prepare (mN);
+        const int H = mN / 2;
+        bamp.assign ((size_t) (kNumBands * (H + 1)), 0.0f);
+        cep.assign ((size_t) mN, 0.0f);
+        mspec.assign ((size_t) mN + 2, 0.0f);
+        hmin.assign ((size_t) mN, 0.0f);
+        std::vector<float> z ((size_t) mN), Z ((size_t) mN + 2);
+        for (int b = 0; b < kNumBands; ++b)
+        {
+            std::fill (z.begin(), z.end(), 0.0f);
+            for (int i = 0; i < taps; ++i)
+                z[(size_t) ((i - half + mN) % mN)] = bank[(size_t) b][(size_t) i]; // zero phase: the centre at 0
+            mfft.forward (z.data(), Z.data());
+            for (int k = 0; k <= H; ++k)
+                bamp[(size_t) (b * (H + 1) + k)] = Z[(size_t) (2 * k)];
+        }
+        taper.assign ((size_t) taps, 1.0f);
+        const int nt = std::max (1, taps / 6);
+        for (int i = 0; i < nt; ++i)
+            taper[(size_t) (taps - nt + i)] = (float) (0.5 + 0.5 * std::cos (kPi * (i + 0.5) / nt));
+    }
+
+    void buildMinPhase() noexcept
+    {
+        const int H = mN / 2;
+        for (int k = 0; k <= H; ++k)
+        {
+            float a = 1.0f;
+            for (int b = 0; b < kNumBands; ++b)
+                a += (gainLin[(size_t) b] - 1.0f) * bamp[(size_t) (b * (H + 1) + k)];
+            mspec[(size_t) (2 * k)] = std::log (std::max (a, 1.0e-5f));
+            mspec[(size_t) (2 * k + 1)] = 0.0f;
+        }
+        mfft.inverse (mspec.data(), cep.data());          // real cepstrum (even)
+        for (int n = 1; n < H; ++n)                        // fold onto n >= 0: the minimum-phase cepstrum
+            cep[(size_t) n] *= 2.0f;
+        std::fill (cep.begin() + H + 1, cep.end(), 0.0f);
+        mfft.forward (cep.data(), mspec.data());           // log H_min
+        for (int k = 0; k <= H; ++k)
+        {
+            const float m = std::exp (mspec[(size_t) (2 * k)]), ph = mspec[(size_t) (2 * k + 1)];
+            mspec[(size_t) (2 * k)] = m * std::cos (ph);
+            mspec[(size_t) (2 * k + 1)] = m * std::sin (ph);
+        }
+        mfft.inverse (mspec.data(), hmin.data());
+        for (int i = 0; i < taps; ++i)
+            hNew[(size_t) (taps - 1 - i)] = hmin[(size_t) i] * taper[(size_t) i];
     }
 
     void update (const DetFrame& f) noexcept
@@ -697,20 +817,23 @@ private:
                         g[b] = std::max ((float) (10.0 * std::log10 (C / f.E[b])), -params.rangeDb) * w;
             }
         }
-        // look-ahead: min over the next kLook frames, then instant attack / 12 ms release
+        // look-ahead: min over the next kLook frames, then instant attack / 12 ms release (LIVE: no look-ahead)
         auto& slot = look[(size_t) lookPos];
         for (int b = 0; b < kNumBands; ++b)
             slot[(size_t) b] = g[b];
         pLook[(size_t) lookPos] = f.p;
         lookPos = (lookPos + 1) % (kLook + 1);
-        const float pNow = pLook[(size_t) lookPos]; // the oldest = frame being applied now
+        const float pNow = live ? f.p : pLook[(size_t) lookPos]; // the oldest = frame being applied now
         bool identity = true;
         double eBefore = 0.0, eAfter = 0.0;
         for (int b = 0; b < kNumBands; ++b)
         {
             float mn = 0.0f;
-            for (const auto& q : look)
-                mn = std::min (mn, q[(size_t) b]);
+            if (live)
+                mn = g[b];
+            else
+                for (const auto& q : look)
+                    mn = std::min (mn, q[(size_t) b]);
             float& s = smoothDb[(size_t) b];
             s = mn < s ? mn : s + (mn - s) * relK;
             if (s > -1.0e-4f)
@@ -725,6 +848,16 @@ private:
         pPrev = sibilance();
         pApplied = pNow;
         disp.p = pNow;
+        if (live)
+        {
+            std::swap (hOld, hNew);
+            oldIdentity = newIdentity;
+            newIdentity = identity;
+            if (! identity)
+                buildMinPhase();
+            ramp = 0;
+            return;
+        }
         // new composite FIR for the next hop
         std::swap (hOld, hNew);
         oldIdentity = newIdentity;
@@ -759,7 +892,10 @@ private:
     int lookPos = 0, periodicRun = 0;
     std::array<float, kNumBands> smoothDb {}, gainLin {};
     float relK = 0.15f, refK = 0.007f, bodyRef = -140.0f, bodyQ = -140.0f, pApplied = 0.0f, pPrev = 0.0f;
-    bool bodyInit = false, bodyQInit = false;
+    bool bodyInit = false, bodyQInit = false, live = false;
+    int mN = 512;
+    RealFft mfft;
+    std::vector<float> bamp, cep, mspec, hmin, taper;
     DeEssDisplay disp;
 };
 } // namespace axv

@@ -81,6 +81,7 @@ private:
     std::atomic<float>* pMode = nullptr;    std::atomic<float>* pDrive = nullptr;  std::atomic<float>* pGuard = nullptr;
     std::atomic<float>* pTone = nullptr;    std::atomic<float>* pMix = nullptr;    std::atomic<float>* pLevel = nullptr;
     std::atomic<float>* pOutput = nullptr;  std::atomic<float>* pOs = nullptr;    std::atomic<float>* pLowCut = nullptr;
+    std::atomic<float>* pDeessMode = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VelvetProcessor)
 };

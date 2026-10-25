@@ -7,25 +7,32 @@ PASS  impulse comes out at the reported latency (heat on, drive 0) @ 48000: peak
 PASS  silence in, full drive and level -> exactly silence out @ 96000: max |y| 0
 PASS  de-ess 0 %, heat off, low cut off: output = input delayed by the reported latency (1381) @ 96000: max error 0
 PASS  impulse comes out at the reported latency (heat on, drive 0) @ 96000: peak at +1381, reported 1381
+PASS  silence in, full drive and level -> exactly silence out @ 192000: max |y| 0
+PASS  de-ess 0 %, heat off, low cut off: output = input delayed by the reported latency (2725) @ 192000: max error 0
+PASS  impulse comes out at the reported latency (heat on, drive 0) @ 192000: peak at +2725, reported 2725
 PASS  HEAT Tape drive 5: small-signal gain at 1 kHz (auto gain): +0.007 dB
 PASS  HEAT Tape 16x: worst alias below 20 kHz, 7 kHz at -6 dBFS, full drive: -136.6 dBc (limit -95)
 PASS  HEAT Console drive 5: small-signal gain at 1 kHz (auto gain): -0.000 dB
 PASS  HEAT Console 16x: worst alias below 20 kHz, 7 kHz at -6 dBFS, full drive: -122.9 dBc (limit -95)
 PASS  HEAT Tube drive 5: small-signal gain at 1 kHz (auto gain): -0.003 dB
 PASS  HEAT Tube 16x: worst alias below 20 kHz, 7 kHz at -6 dBFS, full drive: -130.4 dBc (limit -95)
-PASS  DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced @ 44100: 16.3 dB (limit > 6)
-PASS  DE-ESS 75 %: worst change on a vowel @ 44100: -110.6 dB re the vowel (limit -50)
+PASS  DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced @ 44100: 15.9 dB (limit > 6)
+PASS  DE-ESS 75 %: worst change on a vowel @ 44100: -110.3 dB re the vowel (limit -50)
 PASS  DE-ESS LISTEN: what is removed + what remains = the input @ 44100: max error 3.7e-09
-PASS  DE-ESS level independence: reduction at -44 dB vs -14 dB @ 44100: 16.34 vs 16.34 dB
-PASS  DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced @ 48000: 16.5 dB (limit > 6)
-PASS  DE-ESS 75 %: worst change on a vowel @ 48000: -110.6 dB re the vowel (limit -50)
+PASS  DE-ESS level independence: reduction at -44 dB vs -14 dB @ 44100: 15.88 vs 15.88 dB
+PASS  DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced @ 48000: 16.0 dB (limit > 6)
+PASS  DE-ESS 75 %: worst change on a vowel @ 48000: -110.0 dB re the vowel (limit -50)
 PASS  DE-ESS LISTEN: what is removed + what remains = the input @ 48000: max error 3.7e-09
-PASS  DE-ESS level independence: reduction at -44 dB vs -14 dB @ 48000: 16.51 vs 16.50 dB
-PASS  DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced @ 96000: 16.0 dB (limit > 6)
-PASS  DE-ESS 75 %: worst change on a vowel @ 96000: -107.3 dB re the vowel (limit -50)
+PASS  DE-ESS level independence: reduction at -44 dB vs -14 dB @ 48000: 16.03 vs 16.03 dB
+PASS  DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced @ 96000: 15.4 dB (limit > 6)
+PASS  DE-ESS 75 %: worst change on a vowel @ 96000: -107.2 dB re the vowel (limit -50)
 PASS  DE-ESS LISTEN: what is removed + what remains = the input @ 96000: max error 3.7e-09
-PASS  DE-ESS level independence: reduction at -44 dB vs -14 dB @ 96000: 15.97 vs 15.96 dB
-PASS  S-GUARD 100 % vs 0 %: heat added to the esses: 26.0 dB less (limit > 10)
+PASS  DE-ESS level independence: reduction at -44 dB vs -14 dB @ 96000: 15.43 vs 15.43 dB
+PASS  DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced @ 192000: 14.3 dB (limit > 6)
+PASS  DE-ESS 75 %: worst change on a vowel @ 192000: -106.0 dB re the vowel (limit -50)
+PASS  DE-ESS LISTEN: what is removed + what remains = the input @ 192000: max error 3.7e-09
+PASS  DE-ESS level independence: reduction at -44 dB vs -14 dB @ 192000: 14.23 vs 14.25 dB
+PASS  S-GUARD 100 % vs 0 %: heat added to the esses: 24.1 dB less (limit > 10)
 PASS  HEAT MIX 0 % = HEAT off: max diff 0
 PASS  OUTPUT +6.0 dB: +6.000 dB
 PASS  host bypass: input delayed by the reported latency: max error 0
@@ -34,6 +41,16 @@ PASS  LOW CUT 90 Hz: gain at 45 Hz: -24.10 dB [-26, -22]
 PASS  LOW CUT 90 Hz: gain at 90 Hz: -3.01 dB [-3.3, -2.7]
 PASS  LOW CUT 90 Hz: gain at 180 Hz: -0.02 dB [-0.35, 0.0]
 PASS  mono (1 in / 1 out) processes: peak 0.083
-PASS  all 20 factory presets: finite output, vowel level within -1.5 .. +1 dB of the input (auto gain; the esses are meant to come down): ok
+PASS  all 22 factory presets (MY VOICE excluded: they set LEVEL for a quieter recording): finite output, vowel level within -1.5 .. +1 dB of the input (auto gain; the esses are meant to come down): ok
+PASS  LIVE, de-ess 0 %, heat off: reported latency 0 and output = input, no delay @ 48000: latency 0, max error 0
+PASS  LIVE, heat on: latency = STUDIO's minus the de-esser's 14 ms @ 48000: 83 vs 755
+PASS  LIVE DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced, within 2 dB of STUDIO @ 48000: 16.4 dB (STUDIO 16.0)
+PASS  LIVE DE-ESS 75 %: worst change on a vowel @ 48000: -88.7 dB re the vowel (limit -50)
+PASS  LIVE DE-ESS LISTEN: what is removed + what remains = the input @ 48000: max error 7.5e-09
+PASS  LIVE, de-ess 0 %, heat off: reported latency 0 and output = input, no delay @ 192000: latency 0, max error 0
+PASS  LIVE, heat on: latency = STUDIO's minus the de-esser's 14 ms @ 192000: 37 vs 2725
+PASS  LIVE DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced, within 2 dB of STUDIO @ 192000: 14.9 dB (STUDIO 14.3)
+PASS  LIVE DE-ESS 75 %: worst change on a vowel @ 192000: -88.6 dB re the vowel (limit -50)
+PASS  LIVE DE-ESS LISTEN: what is removed + what remains = the input @ 192000: max error 7.5e-09
 
-ALL PASS: 37 of 37 independent checks passed (18 s)
+ALL PASS: 54 of 54 independent checks passed (41 s)

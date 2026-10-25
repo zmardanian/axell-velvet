@@ -151,7 +151,7 @@ The models' operating point is "the vocal at -18 LUFS". LEARN measures the input
 sets LEVEL = -18 - measured. LEVEL never changes the output volume (the pre/post gains cancel exactly).
 
 Factory presets keep LEVEL, because it belongs to the recording. The five MY VOICE presets set it to Axell's measured
-recording level (+15 dB), so they are one click on his chain.
+recording level (+15 dB), so they are one click on that chain.
 
 ## V12 - Oversampling 16x by default
 
@@ -190,11 +190,11 @@ CPU (48 kHz stereo, one core, defaults): tape 9.2 %, console 6.1 %, tube 4.6 %; 
 
 ## V14 - Known limits
 
-- **Training data:** three voices of read speech; no labelled rap or sung material exists in a free full-band corpus.
-  The chain augmentation covers microphones and compressors, not delivery styles.
-- **Latency:** 14 ms plus the oversampler. There is no zero-latency tracking mode.
-- **Commercial de-essers:** not benchmarked directly (no trial licences installed). The comparison is against the
-  classic designs they are built on.
+(1.0; see V19-V21 for 3.0, which closes the first three.)
+- **Training data (1.0):** three voices of read speech. 3.0: 111 voices (V19). Still read speech: no labelled rap or
+  sung material exists in a free full-band corpus; the artist's own rap takes are used for evaluation (V19, V21).
+- **Latency (1.0):** 14 ms plus the oversampler, no zero-latency mode. 3.0: LIVE, zero latency (V20).
+- **Commercial de-essers (1.0):** not benchmarked. 3.0: a third-party sibilance-aware de-esser, measured (V21).
 
 ## V15 - TAPE head bump
 
@@ -236,3 +236,103 @@ starts - median +2.0 dB over the following vowel for the 42 pops vs +1.8 dB for 
 by level, so any detector loose enough to find it would also thin normal words. The release rule was "ship only if it
 clearly beats a static low cut"; it does not, so 2.0 ships no de-plosive. Recommended for pops: LOW CUT 90 (the
 artist's chains already use it). A future attempt needs pops marked by ear as ground truth.
+
+## V19 - 3.0 detector: 111 voices instead of three
+
+1.0 learned sibilance from three CMU ARCTIC voices. 3.0 adds 108 voices of the CSTR VCTK Corpus 0.92 (University of
+Edinburgh, CC BY 4.0; 60 utterances each, 48 kHz, many accents). VCTK has no phone labels, so they come from the
+Montreal Forced Aligner (MIT) with its English (US) ARPA acoustic model and dictionary v3.0.0 (CC BY 4.0, licences
+checked on the models' own pages). Checked first on ARCTIC, where labels exist: MFA's sibilant frames agree with the
+release labels at F1 0.956-0.978 away from boundaries (`research/mfa_arctic_check.py`).
+
+Same features, same network size (19 -> 32 -> 1), same recipe as 1.0 (`research/train3.py`: 44.1 / 48 / 96 kHz, half
+through random recording chains). Twelve VCTK voices (six female, six male, twelve accents; chosen by a fixed rule
+before any result: `research/corpus3.py`) are never trained on by the evaluation models.
+
+Frame level, held out (`train3.py`, `eval3_v1.py`):
+
+| | 1.0 | 3.0 |
+|---|---|---|
+| 12 VCTK voices, F1 clean / chain | 0.721 / 0.699 | 0.816 / 0.789 |
+| sibilant energy caught clean / chain | 92.4 / 90.5 % | 96.9 / 95.3 % |
+| vowel frames flagged clean / chain | 0.15 / 0.07 % | 0.13 / 0.07 % |
+| the artist's 11 Romanian takes (no model saw them): unvoiced / voiced sibilant energy caught | 85.4 / 55.4 % | 89.8 / 66.1 % |
+| same, vowel frames flagged | 0.145 % | 0.169 % |
+
+On ARCTIC (each voice by a model trained without it) 3.0 catches more on every voice and is better on slt and jmk; on
+bdl it flags more f / th / v frames (F1 0.794 -> 0.774). At the outcome level (V21) the two detectors are equal within
+the benchmark's resolution - 3.0's gain is coverage: the rarer sibilants (zh, ch, j - Romanian j, ge / gi, ce / ci)
+and accents 1.0 never heard.
+
+## V20 - LIVE: a zero-latency de-esser
+
+STUDIO looks 4 ms ahead and cuts with linear-phase bands: 14 ms of latency, compensated by the host when mixing, but
+too late to hear yourself through the plugin while recording. LIVE removes the latency completely:
+
+- **Detector:** causal (`DetectorConfig::live()`): each frame is used as soon as its 12 ms window is complete, features
+  are smoothed over the past only, and LIVE has its own network trained on exactly those features (`train3.py live`).
+  Training the label a few ms ahead of the frame (3 or 6 ms) changed nothing measurable, so the label sits at the
+  frame centre, as in STUDIO.
+- **Filter:** the same water-filling gains as STUDIO, the same band magnitude, made minimum phase every 2 ms (real
+  cepstrum: log |H| -> cepstrum -> fold -> exp). A minimum-phase filter has no delay: its energy is at the front.
+  The first design, a cascade of ten bell filters, was rejected after the benchmark: wanting a flat -18 dB, the bells
+  give -18 dB at their centres but -1 to -8 dB between them (a simulation confirmed it), and LIVE left 3-6 % harsh
+  esses where STUDIO left 0.3-0.5 %. With the minimum-phase filter LIVE's cut matches STUDIO's (synthetic voice:
+  13.9 vs 13.8 dB).
+- **Exactness:** with nothing to cut the output is the input itself, bit for bit, at any block size.
+- **HEAT:** the oversampler keeps 1.7 ms at 44.1 / 48 kHz (0.4 ms at 96 kHz). In LIVE with HEAT off that delay goes
+  too: the plugin has no latency at all, and switching HEAT in LIVE is a latency change handled like an oversampling
+  change (host told first, a short fade). In STUDIO the timing never depends on HEAT, as in 1.0.
+
+On the 12 held-out VCTK voices LIVE reaches 1.0 % (clean) / 1.4 % (chain) harsh esses left at full strength (STUDIO
+0.4 / 0.6 %); on all 15 voices, at equal harshness, its change on vowels is 2-3x STUDIO's (0.008 vs 0.003 dB) and on
+stops about the same (V21).
+
+## V21 - Benchmark: Velvet 1.0, 3.0 STUDIO, 3.0 LIVE, a third-party de-esser, the classic designs
+
+`research/bench3.py`: 15 voices no Velvet model was trained on (the 12 VCTK test voices; slt, bdl and jmk by models
+trained without them), one-minute takes, clean and through random recording chains, every de-esser swept over its
+strength. The third-party de-esser is nClear Sibalance 1.1.0 (installed by the artist; 20 ms look-ahead, reported and
+compensated), rendered black-box through the independent VST3 host at Sensitivity 50 and 80. Collateral is measured
+at equal harshness (the same share of harsh esses left), so a de-esser cannot look gentle by doing less.
+
+All 15 voices, change at equal harshness (`research/bench3_results.txt`; "vowels" / "stops" = mean |change| of their
+2-16 kHz energy away from sibilant edges, "soft esses" = what already-soft esses lose - the lisp risk):
+
+| harsh esses left (of 17.3 % clean / 27.1 % chain) | | Velvet 1.0 | Velvet 3.0 | 3.0 LIVE | Sibalance | classic abs | classic rel |
+|---|---|---|---|---|---|---|---|
+| 5.2 % clean | vowels | 0.003 dB | 0.003 | 0.008 | 0.240 | 0.105 | 0.117 |
+| | stops | 0.11 dB | 0.11 | 0.13 | 1.19 | 0.55 | 0.91 |
+| | soft esses | -0.3 dB | -0.3 | -0.7 | -3.2 | -1.4 | -2.5 |
+| 8.1 % chain | vowels | 0.004 dB | 0.004 | 0.009 | 0.333 | 0.124 | 0.187 |
+| | stops | 0.15 dB | 0.15 | 0.16 | 1.62 | 0.67 | 1.27 |
+| | soft esses | -0.3 dB | -0.3 | -0.5 | -3.7 | -1.3 | -2.9 |
+| 2.6 % clean | vowels | 0.009 dB | 0.009 | 0.019 | 0.370 | 0.257 | 0.244 |
+| 4.1 % chain | vowels | 0.009 dB | 0.011 | 0.022 | 0.482 | 0.285 | 0.378 |
+
+(Sibalance at Sensitivity 50; 80 is slightly worse everywhere.) Lowest harshness each reaches at full strength
+(clean / chain): Velvet 3.0 0.9 / 1.1 %, 3.0 LIVE 1.7 / 2.1 %, 1.0 1.1 / 1.2 %, Sibalance 0.6 / 0.6 %, classic 1.2-1.3 /
+1.6-1.7 %. Sibalance goes lower by cutting harder everywhere: even its gentlest setting (-3 dB) removes more than half
+of the harsh esses (8.8 % of 17.3 % left), and at every harshness both reach, it changes everything else far more.
+
+- **Velvet vs the third-party de-esser:** 30-80x less change on vowels, 7-11x less on stops, 5-12x less taken from soft
+  esses, at every harshness both reach; LIVE, with zero latency, still 20-40x less on vowels than Sibalance with its
+  20 ms look-ahead.
+- **3.0 vs 1.0 (STUDIO):** equal within the benchmark's resolution on these voices (the gain is coverage, V19); 3.0
+  reaches a lower harshness at full strength (0.9 vs 1.1 % clean).
+- **The artist's own 12 takes** (`research/realtakes3.py`, `realtakes3_results.txt`; acoustic classes per 4 ms frame,
+  no model saw these takes): harsh esses left uncut at AMOUNT 50: 1.0 16, 3.0 8, 3.0 LIVE 6; at AMOUNT 70: 15, 7, 5.
+  Vowels: mean change 0.0058 dB (1.0) vs 0.0062 dB (3.0) at AMOUNT 50 - both inaudible.
+
+## V22 - Sample rates up to 192 kHz
+
+The detector's features are defined in Hz and seconds, so they do not depend on the rate. 1.0 was tested at 44.1, 48
+and 96 kHz; 3.0's suite adds 192 kHz for both detectors and both de-essers (the synthetic voice: sibilants found, vowels
+not, the exact-delay and LIVE pass-through checks, LISTEN, level independence).
+
+## V23 - Older projects open as they were saved
+
+A project saved by 1.0 has no De-Ess Mode. Every parameter a saved state does not contain now takes its default
+(STUDIO), whatever the instance was set to before - not the instance's current value. A 1.0 project therefore opens
+with the STUDIO de-esser and its saved settings (`tests/PluginTests.cpp`). The detector is 3.0's, so the de-essing is
+not bit-identical to 1.0 (V19, V21).

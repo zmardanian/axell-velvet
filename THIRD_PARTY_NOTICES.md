@@ -15,11 +15,20 @@ texts are reproduced here as shipped in the exact JUCE version used.
 | zlib | as bundled in JUCE 8.0.15 (`modules/juce_core/zip/zlib`) | zlib licence |
 | Inter typeface | https://github.com/rsms/inter (embedded in the plugin binary) | SIL Open Font License 1.1 |
 | CMU ARCTIC speech databases (slt, bdl, jmk) | http://www.festvox.org/cmu_arctic/ (Carnegie Mellon University, 2003) | free for any use, notice below |
+| CSTR VCTK Corpus 0.92 (108 speakers, 60 utterances each, mic1) | Yamagishi, Veaux, MacDonald, University of Edinburgh, https://doi.org/10.7488/ds/2645 | CC BY 4.0 |
+| Montreal Forced Aligner English (US) ARPA acoustic model and dictionary v3.0.0 (used to label VCTK; not shipped) | McAuliffe, Sonderegger, https://mfa-models.readthedocs.io | CC BY 4.0 |
 
-The sibilance detector's network weights (`Source/DetectorModel.h`) were trained on features computed from the CMU
-ARCTIC recordings of the speakers slt, bdl and jmk. No audio from the databases is included in Axell Velvet; the
-weights are derived data. Modification notice (condition 2): the recordings were resampled, passed through random
-recording chains (EQ, compression, level rides, noise) and reduced to detector features; nothing else was changed.
+The sibilance detectors' network weights (`Source/DetectorModel.h`, `Source/DetectorModelLive.h`) were trained on
+features computed from the CMU ARCTIC recordings of the speakers slt, bdl and jmk and from the CSTR VCTK Corpus 0.92
+(108 speakers). No audio from the databases is included in Axell Velvet; the weights are derived data.
+Modification notice (CMU ARCTIC condition 2; CC BY 4.0 "indicate if changes were made"): the recordings were
+resampled, passed through random recording chains (EQ, compression, level rides, noise) and reduced to detector
+features. The VCTK recordings were phone-labelled with the Montreal Forced Aligner using its English (US) ARPA
+acoustic model and dictionary v3.0.0 (CC BY 4.0; McAuliffe and Sonderegger 2024); the labels are not shipped.
+VCTK attribution: Junichi Yamagishi, Christophe Veaux, Kirsten MacDonald, "CSTR VCTK Corpus: English Multi-speaker
+Corpus for CSTR Voice Cloning Toolkit (version 0.92)", University of Edinburgh, The Centre for Speech Technology
+Research (CSTR), 2019, https://doi.org/10.7488/ds/2645, licensed under CC BY 4.0
+(https://creativecommons.org/licenses/by/4.0/).
 
 Published models implemented from their papers (no code, data or measurements of any commercial product are used):
 - D. C. Jiles, D. L. Atherton, "Theory of ferromagnetic hysteresis", J. Magn. Magn. Mater. 61 (1986) 48-60 (TAPE).

@@ -100,20 +100,22 @@ int main()
     {
         VelvetProcessor p;
         const juce::StringArray frozen { "deessOn", "amount", "range", "focus", "listen", "heatOn", "mode", "drive", "guard",
-                                         "tone", "mix", "level", "output", "os", "lowcut" };
+                                         "tone", "mix", "level", "output", "os", "lowcut", "deessMode" };
         auto& params = p.getParameters();
         check (params.size() == frozen.size(), "parameter count = " + juce::String (frozen.size()));
         for (int i = 0; i < params.size() && i < frozen.size(); ++i)
         {
             auto* wp = dynamic_cast<juce::AudioProcessorParameterWithID*> (params[i]);
-            check (wp != nullptr && wp->getParameterID() == frozen[i] && wp->getVersionHint() == 1,
-                   "parameter index " + juce::String (i) + " is '" + frozen[i] + "' (version hint 1)");
+            const int hint = i < 15 ? 1 : 3; // 1.0's fifteen, then 3.0's De-Ess Mode
+            check (wp != nullptr && wp->getParameterID() == frozen[i] && wp->getVersionHint() == hint,
+                   "parameter index " + juce::String (i) + " is '" + frozen[i] + "' (version hint " + juce::String (hint) + ")");
         }
         const auto d = p.readParams();
         check (d.deessOn && std::abs (d.amountPct - 50.0f) < 1e-4f && d.heatOn && d.mode == axv::kTape && std::abs (d.drive - 4.0f) < 1e-4f
                    && d.osLog2 == 4 && std::abs (d.levelDb) < 1e-4f && ! d.listen,
                "defaults: de-ess 50 %, tape at drive 4, 16x, LEVEL 0 dB, listen off");
         check (d.lowCut == 1, "default LOW CUT 30 Hz (rumble only)");
+        check (! d.live, "default de-ess mode STUDIO");
     }
 
     //== 2. state save/restore: non-default values -> identical parameters + identical audio
@@ -122,7 +124,7 @@ int main()
         const std::pair<const char*, float> values[] = { { "deessOn", 1.0f }, { "amount", 72.5f }, { "range", 21.0f }, { "focus", 1.0f },
                                                          { "listen", 0.0f }, { "heatOn", 1.0f }, { "mode", 2.0f }, { "drive", 6.3f },
                                                          { "guard", 85.0f }, { "tone", -35.0f }, { "mix", 70.0f }, { "level", 9.5f },
-                                                         { "output", -1.5f }, { "os", 2.0f }, { "lowcut", 3.0f } };
+                                                         { "output", -1.5f }, { "os", 2.0f }, { "lowcut", 3.0f }, { "deessMode", 1.0f } };
         for (auto& v : values)
             setParam (a, v.first, v.second);
         a.setPresetName ("My Lead Vocal");
@@ -150,8 +152,27 @@ int main()
             for (size_t i = 0; i < oa[0].size(); ++i)
                 diff = std::max (diff, (double) std::abs (oa[(size_t) c][i] - ob[(size_t) c][i]));
         check (diff <= 0.0, "state restore: restored instance renders bit-identical audio (max diff " + juce::String (diff) + ")");
-        check (a.getLatencySamples() == a.engine().latencyOf ({ 3 }) && b.getLatencySamples() == a.getLatencySamples(),
-               "state restore: latency = de-esser + 8x oversampling (" + juce::String (b.getLatencySamples()) + " samples)");
+        check (a.getLatencySamples() == a.engine().latencyOf ({ 3, true }) && b.getLatencySamples() == a.getLatencySamples()
+                   && a.engine().latencyOf ({ 3, true }) == a.engine().latencyOf ({ 3, false }) - a.engine().latencyOf ({ 0, false }) + a.engine().latencyOf ({ 0, true }),
+               "state restore: latency = LIVE de-esser (0) + 8x oversampling (" + juce::String (b.getLatencySamples()) + " samples)");
+    }
+
+    //== 2a. a 1.0 project (no De-Ess Mode in its state) opens with the STUDIO de-esser, even on an instance set to LIVE
+    {
+        VelvetProcessor a;
+        setParam (a, "amount", 64.0f);
+        juce::MemoryBlock state;
+        a.getStateInformation (state);
+        std::unique_ptr<juce::XmlElement> xml (juce::AudioProcessor::getXmlFromBinary (state.getData(), (int) state.getSize()));
+        auto tree = juce::ValueTree::fromXml (*xml);
+        tree.removeChild (tree.getChildWithProperty ("id", "deessMode"), nullptr);
+        juce::MemoryBlock old;
+        juce::AudioProcessor::copyXmlToBinary (*tree.createXml(), old);
+        VelvetProcessor b;
+        setParam (b, "deessMode", 1.0f);
+        b.setStateInformation (old.getData(), (int) old.getSize());
+        check (! b.readParams().live && std::abs (getParam (b, "amount") - 64.0f) < 1e-4f,
+               "1.0 state (no De-Ess Mode): restores its values and the STUDIO de-esser");
     }
 
     //== 2b. pluginval-style: raw (unsnapped) normalised values on every parameter, save, scramble, restore
@@ -209,13 +230,36 @@ int main()
                    "after switching to " + juce::String (2 << os) + "x: reported latency " + juce::String (p.getLatencySamples()) + " = " + juce::String (expect));
         }
         check (finite, "every sample during the switches finite and in range");
+        // 3.0: LIVE (the de-esser's latency goes) and LIVE with HEAT off (no latency at all), and back to STUDIO
+        struct Step { float mode, heat; axv::Engine::Config cfg; const char* what; };
+        const Step steps[] = { { 1.0f, 1.0f, { 4, true, true }, "LIVE, heat on: latency = 16x oversampler only" },
+                               { 1.0f, 0.0f, { 4, true, false }, "LIVE, heat off: latency 0" },
+                               { 0.0f, 0.0f, { 4, false, true }, "back to STUDIO, heat off: de-esser + 16x" } };
+        setParam (p, "os", 3.0f);
+        for (const auto& st : steps)
+        {
+            setParam (p, "deessMode", st.mode);
+            setParam (p, "heatOn", st.heat);
+            for (int k = 0; k < 4; ++k)
+            {
+                const auto out = render (p, sig);
+                for (auto& ch : out)
+                    for (float v : ch)
+                        finite = finite && std::isfinite (v) && std::abs (v) < 2.0f;
+                pumpMessages (60);
+            }
+            const int expect = p.engine().latencyOf (st.cfg);
+            check (p.getLatencySamples() == expect && p.engine().getLatencySamples() == expect,
+                   juce::String (st.what) + " (reported " + juce::String (p.getLatencySamples()) + ", expected " + juce::String (expect) + ")");
+        }
+        check (finite && p.engine().latencyOf ({ 4, true, false }) == 0, "LIVE switches: every sample finite; LIVE + heat off is 0 samples");
     }
 
     //== 4. factory programs
     {
         VelvetProcessor p;
         const auto list = axv::factoryPresets();
-        check (p.getNumPrograms() == 25, "programs: " + juce::String (p.getNumPrograms()) + " factory presets (20 + 5 MY VOICE)");
+        check (p.getNumPrograms() == 28, "programs: " + juce::String (p.getNumPrograms()) + " factory presets (20 + 2 TRACKING + 6 MY VOICE)");
         bool allOk = true;
         int mine = 0;
         for (int i = 0; i < p.getNumPrograms(); ++i)
@@ -230,14 +274,14 @@ int main()
             if (std::abs (r.amountPct - e.amountPct) > 0.051f || std::abs (r.rangeDb - e.rangeDb) > 0.051f || r.focus != e.focus
                 || r.heatOn != e.heatOn || r.deessOn != e.deessOn || r.mode != e.mode || std::abs (r.drive - e.drive) > 0.0051f
                 || std::abs (r.guardPct - e.guardPct) > 0.51f || std::abs (r.tone - e.tone) > 0.51f || std::abs (r.mixPct - e.mixPct) > 0.51f
-                || r.osLog2 != e.osLog2 || std::abs (r.levelDb - expectLevel) > 0.051f || r.listen || r.lowCut != e.lowCut)
+                || r.osLog2 != e.osLog2 || std::abs (r.levelDb - expectLevel) > 0.051f || r.listen || r.lowCut != e.lowCut || r.live != e.live)
             {
                 allOk = false;
                 std::printf ("   program %d (%s) did not apply\n", i, pr.name);
             }
         }
         check (allOk, "every program applies its values; factory presets keep LEVEL, MY VOICE presets set it");
-        check (mine == 5, "5 MY VOICE presets set LEVEL");
+        check (mine == 6, "6 MY VOICE presets set LEVEL");
         setParam (p, "level", 0.0f);
         p.setCurrentProgram (0);
         bool defaults = true;

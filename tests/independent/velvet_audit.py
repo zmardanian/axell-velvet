@@ -88,13 +88,13 @@ def bh(n):
 START = time.time()
 # ---------------------------------------------------------------- 1. silence, exact delay, latency, rates
 runs, ins = [], {}
-for fs in (44100, 48000, 96000):
+for fs in (44100, 48000, 96000, 192000):
     runs.append(Run(f"sil{fs}", fs, sets={"Drive": "10", "Level": "+36", "Tone": "Bright 100"})); ins[f"sil{fs}"] = np.zeros((fs, 2))
     runs.append(Run(f"tr{fs}", fs, sets=CLEAN)); ins[f"tr{fs}"] = f32(np.random.default_rng(fs).uniform(-0.3, 0.3, (int(1.5 * fs), 2)))
     imp = np.zeros((fs, 2)); imp[fs // 2] = 0.5
     runs.append(Run(f"imp{fs}", fs, sets={"De-Ess Amount": "0", "Low Cut": "Off", "Drive": "0", "Level": "-24"})); ins[f"imp{fs}"] = imp
 out = run_all(runs, ins, jobname="a1")
-for fs in (44100, 48000, 96000):
+for fs in (44100, 48000, 96000, 192000):
     report(f"silence in, full drive and level -> exactly silence out @ {fs}", np.abs(out[f"sil{fs}"]).max() == 0.0, f"max |y| {np.abs(out[f'sil{fs}']).max():.3g}")
     r = [r for r in runs if r.name == f"tr{fs}"][0]; x = ins[r.name]; y = out[r.name]; L = r.latency
     e = np.abs(y[L:] - x[:len(x) - L]).max()
@@ -127,7 +127,7 @@ for m in ("Tape", "Console", "Tube"):
     report(f"HEAT {m} 16x: worst alias below 20 kHz, 7 kHz at -6 dBFS, full drive", a < -95, f"{a:.1f} dBc (limit -95)")
 
 # ---------------------------------------------------------------- 3. DE-ESS on an independent synthetic voice
-for fs in (44100, 48000, 96000):
+for fs in (44100, 48000, 96000, 192000):
     x, vowels, esses = voice(fs, 7.0)
     xq, _, _ = voice(fs, 7.0, gain_db=-44.0)
     skip = int(1.5 * fs)
@@ -188,7 +188,8 @@ report("mono (1 in / 1 out) processes", np.isfinite(ym).all() and 0.01 < np.abs(
 # ---------------------------------------------------------------- 5. every factory preset on the voice: finite, level kept
 names = ["Init", "De-Ess Only", "Gentle Polish", "Heat Only", "Rap Lead - Upfront", "Rap Lead - Warm Tape", "Trap Vocal - Bright & Smooth",
          "Boom Bap Grit", "Ad-Libs Thick", "Doubles & Stacks", "Hype Shouts", "R&B Silk", "Pop Vocal Air", "Soul Tube Bloom",
-         "Intimate & Close", "Belting Control", "Podcast & Spoken Word", "Harsh Mic Rescue", "Lo-Fi Saturated", "Parallel Crunch"]
+         "Intimate & Close", "Belting Control", "Podcast & Spoken Word", "Harsh Mic Rescue", "Lo-Fi Saturated", "Parallel Crunch",
+         "Tracking - De-Ess Only", "Tracking - Warm Monitor"]
 runs = [Run(f"p{i}", fs, sets={"Program": n}) for i, n in enumerate(names)]
 out = run_all(runs, {r.name: x for r in runs}, jobname="presets")
 vs = [s for s in vowels if s[0] > int(1.5 * fs)]
@@ -199,8 +200,39 @@ for r, n in zip(runs, names):
     d = 10 * np.log10(sum(np.sum(y[a:b] ** 2) for a, b in vs)) - lev_in
     if not np.isfinite(y).all() or not -1.5 < d < 1.0:
         bad.append(f"{n} ({d:+.1f} dB)")
-report("all 20 factory presets: finite output, vowel level within -1.5 .. +1 dB of the input (auto gain; the esses are "
+report(f"all {len(names)} factory presets (MY VOICE excluded: they set LEVEL for a quieter recording): finite output, vowel level within -1.5 .. +1 dB of the input (auto gain; the esses are "
        "meant to come down)", not bad, ", ".join(bad) if bad else "ok")
+
+# ---------------------------------------------------------------- 6. 3.0 LIVE: zero latency, the same cut as STUDIO
+LIVE = {"De-Ess Mode": "Live"}
+for fs in (48000, 192000):
+    x, vowels, esses = voice(fs, 7.0)
+    skip = int(1.5 * fs)
+    es = [s for s in esses if s[0] > skip]; vs = [s for s in vowels if s[0] > skip]
+    tr = f32(np.random.default_rng(fs + 1).uniform(-0.3, 0.3, (int(1.5 * fs), 2)))
+    runs = [Run("t", fs, sets=dict(CLEAN, **LIVE)),
+            Run("h", fs, sets=dict(LIVE, **{"De-Ess Amount": "0", "Low Cut": "Off", "Drive": "0"})),
+            Run("hs", fs, sets={"De-Ess Amount": "0", "Low Cut": "Off", "Drive": "0"}),
+            Run("d", fs, sets=dict(LIVE, **{"Heat On": "Off", "Low Cut": "Off", "De-Ess Amount": "75"})),
+            Run("ds", fs, sets={"Heat On": "Off", "Low Cut": "Off", "De-Ess Amount": "75"}),
+            Run("l", fs, sets=dict(LIVE, **{"Heat On": "Off", "Low Cut": "Off", "De-Ess Amount": "75", "De-Ess Listen": "On"}))]
+    out = run_all(runs, {"t": tr, "h": x, "hs": x, "d": x, "ds": x, "l": x}, jobname=f"live{fs}")
+    R = {r.name: r for r in runs}
+    e = np.abs(out["t"][:len(tr)] - tr).max()
+    report(f"LIVE, de-ess 0 %, heat off: reported latency 0 and output = input, no delay @ {fs}", R["t"].latency == 0 and e == 0.0,
+           f"latency {R['t'].latency}, max error {e:.3g}")
+    report(f"LIVE, heat on: latency = STUDIO's minus the de-esser's 14 ms @ {fs}", abs((R["hs"].latency - R["h"].latency) - round(0.014 * fs)) <= 2,
+           f"{R['h'].latency} vs {R['hs'].latency}")
+    n = len(x)
+    y = aligned(out["d"], 0, n)[:, 0]; ys = aligned(out["ds"], R["ds"].latency, n)[:, 0]; rem = aligned(out["l"], 0, n)[:, 0]
+    red = band_energy(x[:len(y), 0], fs, 2500, 12000, es) - band_energy(y, fs, 2500, 12000, es)
+    reds = band_energy(x[:len(ys), 0], fs, 2500, 12000, es) - band_energy(ys, fs, 2500, 12000, es)
+    report(f"LIVE DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced, within 2 dB of STUDIO @ {fs}", red > 6.0 and abs(red - reds) < 2.0,
+           f"{red:.1f} dB (STUDIO {reds:.1f})")
+    worst = max(10 * np.log10(np.sum((y[a:b] - x[a:b, 0]) ** 2) / np.sum(x[a:b, 0] ** 2) + 1e-30) for a, b in vs)
+    report(f"LIVE DE-ESS 75 %: worst change on a vowel @ {fs}", worst < -50, f"{worst:.1f} dB re the vowel (limit -50)")
+    e = np.abs(y + rem - x[:len(y), 0]).max()
+    report(f"LIVE DE-ESS LISTEN: what is removed + what remains = the input @ {fs}", e < 1e-6, f"max error {e:.2g}")
 
 fails = sum(1 for _, ok, _ in results if not ok)
 print(f"\n{'ALL PASS' if fails == 0 else 'FAILURES'}: {len(results) - fails} of {len(results)} independent checks passed ({time.time() - START:.0f} s)")

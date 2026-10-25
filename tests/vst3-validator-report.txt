@@ -15,7 +15,7 @@
 	name = Axell Velvet
 	category = Audio Module Class
 	subCategories = Fx|Dynamics|Distortion
-	version = 1.0.0
+	version = 3.0.0
 	sdkVersion = VST 3.8.0
 	cid = ABCDEF019182FAEB41787962566C7631
 
@@ -23,7 +23,7 @@
 	name = Axell Velvet
 	category = Component Controller Class
 	subCategories = Fx|Dynamics|Distortion
-	version = 1.0.0
+	version = 3.0.0
 	sdkVersion = VST 3.8.0
 	cid = ABCDEF011234ABCD41787962566C7631
 
@@ -59,7 +59,7 @@ Info:  => Event Buses: [0 In(s) => 0 Out(s)]
 
 [Scan Parameters]
 Info:  ===Scan Parameters ====================================
-Info:  This component exports 17 parameter(s)
+Info:  This component exports 18 parameter(s)
 Info:     Parameter 000 (id=1544413795): [title="De-Ess On"] [unit=""] [type = Toggle, default = 1.000000, unit = 0]
 Info:     Parameter 001 (id=733630552): [title="De-Ess Amount"] [unit=""] [type = Float, default = 0.500000, unit = 0]
 Info:     Parameter 002 (id=108280125): [title="De-Ess Range"] [unit=""] [type = Float, default = 0.555556, unit = 0]
@@ -75,9 +75,10 @@ Info:     Parameter 011 (id=102865796): [title="Level"] [unit=""] [type = Float,
 Info:     Parameter 012 (id=1141971201): [title="Output"] [unit=""] [type = Float, default = 0.500000, unit = 0]
 Info:     Parameter 013 (id=3556): [title="Oversampling"] [unit=""] [type = Discrete, default = 1.000000, unit = 0]
 Info:     Parameter 014 (id=1050619502): [title="Low Cut"] [unit=""] [type = Discrete, default = 0.333333, unit = 0]
-Info:     Parameter 015 (id=1652125811): [title="Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
-Info:     Parameter 016 (id=1886548852): [title="Program"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
-Info:  =>Parameter 016 (id=1886548852) is kIsProgramChange, but not a kIsList!
+Info:     Parameter 015 (id=270400807): [title="De-Ess Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 016 (id=1652125811): [title="Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 017 (id=1886548852): [title="Program"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:  =>Parameter 017 (id=1886548852) is kIsProgramChange, but not a kIsList!
 [Succeeded]
 
 [MIDI Mapping]
@@ -97,7 +98,7 @@ Info:     Unit000 (ID = 0): "Root Unit" (parent ID = -1, programlist ID = 188654
 
 [Scan Programs]
 Info:  ===Scan Programs ====================================
-Info:  Programlist 000 (id=1886548852):  "Factory Presets" (25 programs).
+Info:  Programlist 000 (id=1886548852):  "Factory Presets" (28 programs).
 Info:  Programlist 000->Program 000: "Init"
 Info:  Programlist 000->Program 001: "De-Ess Only"
 Info:  Programlist 000->Program 002: "Gentle Polish"
@@ -118,11 +119,14 @@ Info:  Programlist 000->Program 016: "Podcast & Spoken Word"
 Info:  Programlist 000->Program 017: "Harsh Mic Rescue"
 Info:  Programlist 000->Program 018: "Lo-Fi Saturated"
 Info:  Programlist 000->Program 019: "Parallel Crunch"
-Info:  Programlist 000->Program 020: "My Voice - Everyday Lead"
-Info:  Programlist 000->Program 021: "My Voice - Hard Rap Lead"
-Info:  Programlist 000->Program 022: "My Voice - Melodic Hook"
-Info:  Programlist 000->Program 023: "My Voice - Doubles & Ad-libs"
-Info:  Programlist 000->Program 024: "My Voice - Dark & Intimate"
+Info:  Programlist 000->Program 020: "Tracking - De-Ess Only"
+Info:  Programlist 000->Program 021: "Tracking - Warm Monitor"
+Info:  Programlist 000->Program 022: "My Voice - Everyday Lead"
+Info:  Programlist 000->Program 023: "My Voice - Hard Rap Lead"
+Info:  Programlist 000->Program 024: "My Voice - Melodic Hook"
+Info:  Programlist 000->Program 025: "My Voice - Doubles & Ad-libs"
+Info:  Programlist 000->Program 026: "My Voice - Tracking (Live)"
+Info:  Programlist 000->Program 027: "My Voice - Dark & Intimate"
 [Succeeded]
 
 [Terminate/Initialize]
@@ -263,6 +267,7 @@ Info:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ===============
 
 [Accuracy: Sample, 1 Parameters, Change every100 Samples]
 Info:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================
+Info:     Not all points have been read via IParameterChanges
 Info:     Not all points have been read via IParameterChanges
 [Succeeded]
 

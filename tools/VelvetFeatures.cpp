@@ -1,5 +1,6 @@
 // Axell Velvet - detector feature dump for training (research/train_cpp.py): runs the shipping SibilanceDetector on
-// raw float32 mono files. Manifest lines: <in.f32> <sampleRate> <out.f32>. Output rows of kCols float32:
+// raw float32 mono files. Manifest lines: <in.f32> <sampleRate> <out.f32>; --live: the LIVE (causal) detector.
+// Output rows of kCols float32:
 //   centre (s), feat[10], adapted[10], x[14], E[10], bodyDb, levelDb, f0, apRaw, p
 #include "../Source/Sibilance.h"
 
@@ -14,10 +15,11 @@ int main (int argc, char** argv)
 {
     if (argc < 2)
     {
-        std::cerr << "usage: VelvetFeatures manifest.txt\n";
+        std::cerr << "usage: VelvetFeatures manifest.txt [--live]\n";
         return 2;
     }
     std::ifstream man (argv[1]);
+    const bool live = argc > 2 && std::string (argv[2]) == "--live";
     std::string line;
     int files = 0;
     while (std::getline (man, line))
@@ -33,7 +35,7 @@ int main (int argc, char** argv)
         f.seekg (0);
         f.read ((char*) x.data(), (std::streamsize) (x.size() * sizeof (float)));
         axv::SibilanceDetector det;
-        det.prepare (fs);
+        det.prepare (fs, live ? axv::DetectorConfig::live() : axv::DetectorConfig {});
         std::vector<float> rows;
         for (float v : x)
             if (det.push (v))

@@ -1,5 +1,5 @@
 // Axell Velvet - DSP suite (JUCE-free: the Source/ headers exactly as they ship). Exit code = failed checks.
-//   VelvetDspTests          44.1 / 48 / 96 kHz + CPU benchmark
+//   VelvetDspTests          44.1 / 48 / 96 / 192 kHz (STUDIO and LIVE) + CPU benchmark
 //   VelvetDspTests --quick  48 kHz only, no CPU benchmark
 #include "Engine.h"
 #include "Presets.h"
@@ -137,7 +137,9 @@ static Voice voice (double fs, double secs, double gainDb = -14.0, unsigned seed
             }
             y = 0.25 * env * s;
         }
-        const double w = nlp2.process (nlp1.process (nd (g), 0), 0);
+        // the resonators' gain grows with the rate (b0 = 1 - r, peak ~ 1 / (2 sin w)): scale the noise so the esses sit
+        // at the same level re the vowels at every rate (48 kHz unchanged)
+        const double w = nlp2.process (nlp1.process (nd (g), 0), 0) * std::sqrt (48000.0 / fs);
         const double a = rs[2] * w + rs[0] * s1 + rs[1] * s2;
         s2 = s1;
         s1 = a;
@@ -289,8 +291,11 @@ static void testRate (double fs, bool quick)
             for (size_t i = 0; i < y[0].size(); ++i)
                 if (std::abs (y[0][i]) > std::abs (y[0][pk]))
                     pk = i;
+            // TUBE's plate capacitance (a pole at 35 kHz) delays the peak physically by 1 / (2 pi 35 kHz) = 4.5 us:
+            // 0.2 samples at 48 kHz, 0.9 at 192 kHz (the latency itself is exact; the peak lands on the nearest sample)
+            const double plate = mode == kTube ? std::round (fs / (2.0 * kPi * 35000.0)) : 0.0;
             check (std::string ("impulse peak - reported latency, ") + (mode == 0 ? "tape" : mode == 1 ? "console" : "tube") + " "
-                       + std::to_string (1 << os) + "x" + R, (double) pk - (double) at - L, 0.0, 0.0, "smp");
+                       + std::to_string (1 << os) + "x" + R, (double) pk - (double) at - L, 0.0, plate, "smp");
         }
     // 3. silence in -> exactly zero out (every mode, full drive, every oversampling)
     for (int mode = 0; mode < kNumModes; ++mode)
@@ -637,15 +642,182 @@ static void testRate (double fs, bool quick)
     }
 }
 
+// LIVE de-esser (3.0): zero latency, causal detector, minimum-phase bells
+static void testLive (double fs)
+{
+    const std::string R = " [LIVE] @ " + rateName (fs);
+    // 1. de-ess 0 %, heat off: the output IS the input (no delay at all), any block size
+    {
+        auto v = voice (fs, 3.0);
+        Params p = clean();
+        p.live = true;
+        for (int block : { 1, 64, 512, 4096 })
+        {
+            auto e = make (fs, p, 2, 4096);
+            const auto y = run (*e, v.x, block);
+            double err = 0;
+            for (int c = 0; c < 2; ++c)
+                for (size_t i = 0; i < y[0].size(); ++i)
+                    err = std::max (err, (double) std::abs (y[(size_t) c][i] - v.x[(size_t) c][i]));
+            if (block == 512)
+                check ("latency reported" + R, (double) e->getLatencySamples(), 0.0, 0.0, "smp");
+            check ("de-ess 0 %, heat off, block " + std::to_string (block) + ": max |out - in| (no delay)" + R, err, 0.0, 0.0, "");
+        }
+        // heat on: only the oversampler's latency remains
+        Params ph = p;
+        ph.heatOn = true;
+        ph.osLog2 = 4;
+        Params ps = ph;
+        ps.live = false;
+        auto el = make (fs, ph), es = make (fs, ps);
+        check ("heat on, 16x: latency = studio latency - the de-esser's" + R, (double) (es->getLatencySamples() - el->getLatencySamples()),
+               std::round (0.014 * fs) - 2.0, std::round (0.014 * fs) + 2.0, "smp");
+        // HEAT switched on and off while playing in LIVE: the latency follows (0 <-> the oversampler's), no click
+        {
+            Params q = p;
+            q.amountPct = 50.0f;
+            auto e = make (fs, q);
+            Buf y = v.x;
+            float maxIn = 0.0f;
+            for (size_t i = 1; i < v.x[0].size(); ++i)
+                maxIn = std::max (maxIn, std::abs (v.x[0][i] - v.x[0][i - 1]));
+            int lat0 = e->getLatencySamples(), latOn = -1;
+            for (size_t s = 0, k = 0; s < y[0].size(); s += 256, ++k)
+            {
+                if (k == 100 || k == 250)
+                {
+                    q.heatOn = k == 100;
+                    e->setParams (q);
+                }
+                float* io[2] = { y[0].data() + s, y[1].data() + s };
+                e->process (io, 2, (int) std::min<size_t> (256, y[0].size() - s));
+                if (k == 200)
+                    latOn = e->getLatencySamples();
+            }
+            float maxOut = 0.0f;
+            for (size_t i = 1; i < y[0].size(); ++i)
+                maxOut = std::max (maxOut, std::abs (y[0][i] - y[0][i - 1]));
+            Params qh = q;
+            qh.heatOn = true;
+            const int osLat = make (fs, qh)->getLatencySamples();
+            check ("HEAT on/off while playing: latency 0 -> the oversampler's -> 0" + R,
+                   (lat0 == 0 && latOn == osLat && osLat > 0 && e->getLatencySamples() == 0) ? 1.0 : 0.0, 1.0, 1.0, "");
+            check ("HEAT on/off while playing: largest sample step re the input's" + R, maxOut / maxIn, 0.0, 1.5, "x");
+        }
+    }
+    // 2. esses down, vowels untouched, LISTEN complementary, never a boost
+    {
+        auto v = voice (fs, 6.0);
+        Params p;
+        p.heatOn = false;
+        p.amountPct = 75.0f;
+        p.lowCut = 0;
+        p.live = true;
+        const auto y = render (fs, p, v.x);
+        std::vector<std::pair<size_t, size_t>> es, vs;
+        for (auto s : v.esses)
+            if (s.first > (size_t) (1.3 * fs)) es.push_back (s);
+        for (auto s : v.vowels)
+            if (s.first > (size_t) (1.3 * fs)) vs.push_back (s);
+        const double eIn = bandEnergyDb (v.x[0], es, fs, 2500.0, 12000.0), eOut = bandEnergyDb (y[0], es, fs, 2500.0, 12000.0);
+        check ("DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced by" + R, eIn - eOut, 6.0, 40.0, "dB");
+        // the minimum-phase filter has STUDIO's magnitude: the same cut, within the detector's later reaction
+        Params pst = p;
+        pst.live = false;
+        const auto ys = render (fs, pst, v.x);
+        check ("DE-ESS 75 %: reduction re STUDIO's" + R, (eIn - eOut) - (eIn - bandEnergyDb (ys[0], es, fs, 2500.0, 12000.0)), -2.0, 2.0, "dB");
+        double vmax = -300.0;
+        for (auto s : vs)
+        {
+            double a = 0, b = 0;
+            for (size_t i = s.first; i < s.second; ++i)
+            {
+                a += (double) v.x[0][i] * v.x[0][i];
+                b += (double) (y[0][i] - v.x[0][i]) * (y[0][i] - v.x[0][i]);
+            }
+            vmax = std::max (vmax, 10.0 * std::log10 (b / a + 1e-30));
+        }
+        check ("DE-ESS 75 %: worst change on a vowel (difference re vowel)" + R, vmax, -300.0, -60.0, "dB");
+        Params pl = p;
+        pl.listen = true;
+        const auto rem = render (fs, pl, v.x);
+        double err = 0;
+        for (size_t i = 0; i < y[0].size(); ++i)
+            err = std::max (err, (double) std::abs (y[0][i] + rem[0][i] - v.x[0][i]));
+        check ("DE-ESS LISTEN: output + removed == input" + R, err, 0.0, 1.0e-6, "");
+        // the filter never boosts: in every third-octave band from 1 to 20 kHz the de-essed esses are no louder than before
+        double worst = -300.0;
+        for (double lo = 1000.0; lo * 1.26 < std::min (20000.0, 0.45 * fs); lo *= 1.26)
+            worst = std::max (worst, bandEnergyDb (y[0], es, fs, lo, lo * 1.26) - bandEnergyDb (v.x[0], es, fs, lo, lo * 1.26));
+        check ("DE-ESS 75 %: largest third-octave gain on the esses (never a boost)" + R, worst, -300.0, 0.05, "dB");
+    }
+    // 3. level independence
+    {
+        Params p;
+        p.heatOn = false;
+        p.amountPct = 75.0f;
+        p.live = true;
+        auto a = voice (fs, 6.0, -14.0), b = voice (fs, 6.0, -44.0);
+        const auto ya = render (fs, p, a.x), yb = render (fs, p, b.x);
+        std::vector<std::pair<size_t, size_t>> es;
+        for (auto s : a.esses)
+            if (s.first > (size_t) (1.3 * fs)) es.push_back (s);
+        const double ra = bandEnergyDb (a.x[0], es, fs, 2500.0, 12000.0) - bandEnergyDb (ya[0], es, fs, 2500.0, 12000.0);
+        const double rb = bandEnergyDb (b.x[0], es, fs, 2500.0, 12000.0) - bandEnergyDb (yb[0], es, fs, 2500.0, 12000.0);
+        check ("DE-ESS level independence: reduction at -44 dB minus at -14 dB" + R, rb - ra, -0.5, 0.5, "dB");
+    }
+    // 4. STUDIO <-> LIVE while playing: no click; offline the new latency applies at once
+    {
+        auto v = voice (fs, 4.0);
+        Params p;
+        p.heatOn = false;
+        p.amountPct = 60.0f;
+        auto e = make (fs, p);
+        Buf y = v.x;
+        const int block = 256;
+        float maxIn = 0.0f;
+        for (size_t i = 1; i < v.x[0].size(); ++i)
+            maxIn = std::max (maxIn, std::abs (v.x[0][i] - v.x[0][i - 1]));
+        for (size_t s = 0, k = 0; s < y[0].size(); s += block, ++k)
+        {
+            if (k % 150 == 75)
+            {
+                p.live = ! p.live;
+                e->setParams (p);
+            }
+            float* io[2] = { y[0].data() + s, y[1].data() + s };
+            e->process (io, 2, (int) std::min<size_t> (block, y[0].size() - s));
+        }
+        float maxOut = 0.0f;
+        for (size_t i = 1; i < y[0].size(); ++i)
+            maxOut = std::max (maxOut, std::abs (y[0][i] - y[0][i - 1]));
+        check ("STUDIO <-> LIVE switches while playing: largest sample step re the input's" + R, maxOut / maxIn, 0.0, 1.5, "x");
+        Params q = clean();
+        auto e2 = make (fs, q);
+        q.live = true;
+        e2->setParams (q);
+        run (*e2, Buf (2, std::vector<float> (2048, 0.0f)));
+        Buf x (2, std::vector<float> ((size_t) fs, 0.0f));
+        x[0][(size_t) (0.5 * fs)] = 0.5f;
+        const auto yi = run (*e2, x);
+        size_t pk = 0;
+        for (size_t i = 0; i < yi[0].size(); ++i)
+            if (std::abs (yi[0][i]) > std::abs (yi[0][pk]))
+                pk = i;
+        check ("STUDIO -> LIVE offline: impulse at the new latency (0)" + R, (double) pk - 0.5 * fs - e2->getLatencySamples(), 0.0, 0.0, "smp");
+    }
+}
+
 // the detector alone: rate and level independence of the probability on the synthetic voice
 static void testDetector()
 {
     std::string row;
-    for (double fs : { 44100.0, 48000.0, 96000.0 })
+    for (bool causal : { false, true })
+    for (double fs : { 44100.0, 48000.0, 96000.0, 192000.0 })
     {
         auto v = voice (fs, 6.0);
         SibilanceDetector d;
-        d.prepare (fs);
+        d.prepare (fs, causal ? DetectorConfig::live() : DetectorConfig {});
         std::vector<float> p (v.x[0].size(), 0.0f);
         float last = 0.0f;
         for (size_t i = 0; i < v.x[0].size(); ++i)
@@ -667,8 +839,9 @@ static void testDetector()
             if (a > (size_t) (1.3 * fs))
                 for (size_t i = a; i < b; ++i)
                     if (p[i] > 0.0f) { pv += p[i]; nv += 1; }
-        check ("detector: mean probability on the sibilants @ " + rateName (fs), pe / ne, 0.6, 1.0, "");
-        check ("detector: mean probability on the vowels @ " + rateName (fs), pv / nv, 0.0, 0.05, "");
+        const std::string D = causal ? "LIVE detector" : "detector";
+        check (D + ": mean probability on the sibilants @ " + rateName (fs), pe / ne, 0.6, 1.0, "");
+        check (D + ": mean probability on the vowels @ " + rateName (fs), pv / nv, 0.0, 0.05, "");
     }
 }
 
@@ -689,6 +862,7 @@ static void testAllocAndCpu (bool quick)
             p.drive = (float) (k % 11);
             p.listen = k % 50 > 45;
             p.bypass = k % 70 > 64;
+            p.live = k % 90 > 44;
             p.tone = (float) ((int) (k % 9) * 20 - 80);
             e->setParams (p);
             float* io[2] = { y[0].data() + s, y[1].data() + s };
@@ -725,8 +899,11 @@ int main (int argc, char** argv)
     const bool quick = argc > 1 && std::strcmp (argv[1], "--quick") == 0;
     const auto t0 = std::chrono::steady_clock::now();
     testDetector();
-    for (double fs : quick ? std::vector<double> { 48000.0 } : std::vector<double> { 44100.0, 48000.0, 96000.0 })
+    for (double fs : quick ? std::vector<double> { 48000.0 } : std::vector<double> { 44100.0, 48000.0, 96000.0, 192000.0 })
+    {
         testRate (fs, quick);
+        testLive (fs);
+    }
     testAllocAndCpu (quick);
     const double sec = std::chrono::duration<double> (std::chrono::steady_clock::now() - t0).count();
     if (fails == 0)

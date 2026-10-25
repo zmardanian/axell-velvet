@@ -19,6 +19,9 @@ const char* range = "The most any frequency band may be cut. 12-18 dB for natura
 const char* focus = "AUTO: every ess where it is harsh (default). S: only the sharp hiss above 5.6 kHz. SH: only the "
                     "broad 'sh / ch' region below 5.6 kHz.";
 const char* listen = "Hear only what the de-esser removes. You should hear esses and nothing else.";
+const char* deessMode = "STUDIO (default): looks 4 ms ahead and cuts with linear-phase bands - the most precise, for mixing "
+                        "(the host compensates its 14 ms). LIVE: zero latency, for recording while you hear yourself "
+                        "through the plugin; it reacts a few milliseconds later to each ess.";
 const char* sib = "The last seconds of your vocal's treble (2-17 kHz) against its body: bright where the de-esser is "
                   "sure it is an ess, grey otherwise. The dashed line is the AMOUNT target; the teal area from the top "
                   "is the reduction.";
@@ -272,6 +275,7 @@ VelvetEditor::VelvetEditor (VelvetProcessor& p) : AudioProcessorEditor (&p), pro
     amount.bind (proc.apvts, "amount", tip::amount);
     range.bind (proc.apvts, "range", tip::range);
     focus.bind (*proc.apvts.getParameter ("focus"), tip::focus);
+    deessMode.bind (*proc.apvts.getParameter ("deessMode"), tip::deessMode);
     listen.bind (proc.apvts, "listen", tip::listen);
     heatOn.bind (proc.apvts, "heatOn", tip::heatOn);
     mode.bind (*proc.apvts.getParameter ("mode"), tip::mode);
@@ -297,7 +301,7 @@ VelvetEditor::VelvetEditor (VelvetProcessor& p) : AudioProcessorEditor (&p), pro
         timerCallback();
     };
     for (auto* c : std::initializer_list<juce::Component*> { &presetPrev, &presetNext, &presetName, &presetSave, &slotA, &slotB, &slotCopy,
-                                                            &deessOn, &sibView, &amount, &range, &focus, &listen, &heatOn, &mode,
+                                                            &deessOn, &deessMode, &sibView, &amount, &range, &focus, &listen, &heatOn, &mode,
                                                             &heatView, &drive, &guard, &tone, &mix, &level, &learn, &output, &os,
                                                             &inMeter, &outMeter, &lowCut })
         content.addAndMakeVisible (c);
@@ -375,6 +379,7 @@ void VelvetEditor::layout()
     {
         auto a = deessArea.reduced (14, 0).withTrimmedTop (44).withTrimmedBottom (12);
         deessOn.setBounds (deessArea.getRight() - 46, deessArea.getY() + 10, 30, 24);
+        deessMode.setBounds (deessArea.getRight() - 46 - 10 - 132, deessArea.getY() + 10, 132, 24);
         sibView.setBounds (a.removeFromTop (220));
         a.removeFromTop (12);
         amount.setBounds (a.removeFromLeft (180));
