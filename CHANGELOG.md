@@ -1,5 +1,10 @@
 # Changelog
 
+## Research after 1.0.0 (no change to the plugin)
+- Romanian detector retrain studied and not adopted (DECISIONS V17): 1.0's detector stays.
+- De-plosive studied and not built (DECISIONS V18): on real takes it does not beat LOW CUT 90, which remains the
+  recommended pop treatment.
+
 ## 1.0.0 - 2026-10-15
 First release of Axell Velvet, the vocal plugin of the Axell suite.
 

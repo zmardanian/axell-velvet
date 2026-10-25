@@ -210,3 +210,29 @@ The audit measured host bypass at 2.5e-6 instead of 0. A one-pole recursion v +=
 the snap threshold (1e-6), leaving 0.0015 % of the processed signal in the "bypassed" output. The same applied to the
 HEAT on/off and MIX glides and the output gain. All of them now use one glide that snaps within 1e-4 of the target,
 and full bypass returns the dry samples themselves. Audit: 37/37, bypass error 0.
+
+## V17 - Romanian detector retrain (2.0 research, not adopted)
+
+The 1.0 detector was trained on English read speech (CMU ARCTIC), where "s" dominates: held-out, it flags only 28-49 %
+of ch / zh / jh frames - the sounds of Romanian ce/ci, ge/gi, j and ț. Tried for 2.0 (research/train_v2.py,
+eval_v2.py, romanian_data.py): class-balanced and energy-weighted training, plus silver labels from the artist's own
+Romanian takes (frames labelled only where the acoustics leave no doubt; two takes held out). Judged on outcomes with
+the shipping C++ engine (bench_cpp.py), not on frame scores: the retrained detectors removed about 0.2 points more of
+the harsh energy but cut vowels 3-4x more. On the held-out Romanian take, 1.0 already leaves at most one harsh
+sibilant uncut and leaves vowels untouched. 1.0's detector stays.
+
+## V18 - De-plosive (2.0 research, not built)
+
+Plosive pops on the artist's takes are 50-110 ms bursts, mostly below 90 Hz, the strong ones reaching 100-250 Hz.
+Two prototypes: band-to-body ratio learning (research/deplosive_proto.py: cut 75-99 % of the time, rejected) and a
+burst-gated detector in the sub-80 Hz band with zero-phase 20-250 Hz removal (deplosive2.py). On synthetic pops added
+to ARCTIC (synth_pops.py) the burst-gated design reached -17.4 dB of pop left vs -7.3 dB for LOW CUT 90 alone, at a
+small thinning cost. On the artist's real takes it removed nothing beyond LOW CUT 90 (median 0.0 dB on 42 pops) while
+acting 5 % of the time elsewhere.
+
+The reason (research/pop_vs_onset.py): after LOW CUT 90 the pops stand no higher in 90-250 Hz than ordinary word
+starts - median +2.0 dB over the following vowel for the 42 pops vs +1.8 dB for 447 ordinary onsets (p90 +5.9 vs
++8.0). LOW CUT 90 already takes the sub-90 Hz thump, and what is left is indistinguishable from the voice's own onsets
+by level, so any detector loose enough to find it would also thin normal words. The release rule was "ship only if it
+clearly beats a static low cut"; it does not, so 2.0 ships no de-plosive. Recommended for pops: LOW CUT 90 (the
+artist's chains already use it). A future attempt needs pops marked by ear as ground truth.
