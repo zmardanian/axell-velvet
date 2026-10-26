@@ -1,5 +1,7 @@
 #include "PluginEditor.h"
 
+#include <axell/gui/BrandTitle.h>
+
 #include <cmath>
 
 using namespace ui;
@@ -437,14 +439,13 @@ void VelvetEditor::Content::paint (juce::Graphics& g)
     g.fillAll (col::bg);
     g.setColour (col::header);
     g.fillRect (e.headerArea);
-    g.setColour (col::grid);
-    g.drawHorizontalLine (e.headerArea.getBottom() - 1, 0.0f, (float) vui::kWidth);
-    g.setColour (col::text);
-    g.setFont (ui::caps (21.0f, 2));
-    g.drawText ("AXELL VELVET", 18, 8, 320, 26, Justification::centredLeft);
+    axell::brand::drawHeaderRule (g, (float) e.headerArea.getBottom() - 1.0f, 0.0f, (float) vui::kWidth, col::grid);
+    // Axell's Dojo: the family emblem, its wave and dot in Velvet's teal
+    axell::brand::drawEmblem (g, { 12.0f, 6.0f, 46.0f, 46.0f }, col::teal);
+    axell::brand::drawTitle (g, 68.0f, 28.0f, "Velvet", juce::String (juce::CharPointer_UTF8 ("\xe7\xb5\xb9"))); // 絹
     g.setFont (ui::caps (10.0f, 1));
     g.setColour (col::dim);
-    g.drawText ("SMART DE-ESSER  +  ANALOG HEAT", 19, 33, 320, 14, Justification::centredLeft);
+    g.drawText ("SMART DE-ESSER  +  ANALOG HEAT", 67, 37, 320, 14, Justification::centredLeft);
     auto panel = [&g] (Rectangle<int> a, Colour accent, const String& title, const String& sub, bool on)
     {
         const auto r = a.toFloat();

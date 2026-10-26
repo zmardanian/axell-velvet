@@ -108,7 +108,7 @@ PASS  DE-ESS level independence: reduction at -44 dB minus at -14 dB [LIVE] @ 48
 PASS  STUDIO <-> LIVE switches while playing: largest sample step re the input's [LIVE] @ 48.0 kHz              0.6560 x  [0 .. 1.5]
 PASS  STUDIO -> LIVE offline: impulse at the new latency (0) [LIVE] @ 48.0 kHz                                  0.0000 smp  [0 .. 0]
 PASS  no memory allocation in process() (switches, bypass, listen)                                              0.0000 allocs  [0 .. 0]
-ALL PASS: 107 of 107 checks passed (112.3 s)
+ALL PASS: 107 of 107 checks passed (107.2 s)
 PASS  parameter count = 16
 PASS  parameter index 0 is 'deessOn' (version hint 1)
 PASS  parameter index 1 is 'amount' (version hint 1)

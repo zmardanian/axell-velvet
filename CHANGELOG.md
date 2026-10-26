@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.1 - 2026-10-26
+- **Axell's Dojo look**: the family emblem, a brush-written title with Velvet's seal (絹, "silk"), a gold header rule
+  and Velvet's own wine-coloured ground. The sound is unchanged (DSP identical to 3.0.0).
+- Title face: Yuji Syuku (SIL OFL 1.1, a 52 KB subset, embedded).
+- Verified: DSP 467 checks (44.1-192 kHz), plugin 58, ASan + UBSan clean, independent audit 54/54, pluginval
+  strictness 10, Steinberg's VST3 validator 47/47.
+
 ## 3.0.0 - 2026-10-25
 (There is no 2.0: that work was research only - see the next entry.)
 - **LIVE de-esser - zero latency.** A De-Ess Mode switch: STUDIO (as before, for mixing) or LIVE, for recording while

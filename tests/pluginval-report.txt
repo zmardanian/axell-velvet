@@ -1,5 +1,4 @@
-Started validating: /var/home/Alex/axell-velvet/build/AxellVelvet_artefacts/Release/VST3/Axell Velvet.vst3
-Random seed: 0x6263ea1
+Random seed: 0x6de8d6f
 Validation started
 Strictness level: 10
 -----------------------------------------------------------------
@@ -7,7 +6,7 @@ Starting tests in: pluginval / Scan for plugins located in: /var/home/Alex/axell
 Num plugins found: 1
 
 Testing plugin: VST3-Axell Velvet-729a3e29-926b3a99
-Axell Yobag: Axell Velvet v3.0.0
+Axell Yobag: Axell Velvet v3.0.1
 Completed tests in pluginval / Scan for plugins located in: /var/home/Alex/axell-velvet/build/AxellVelvet_artefacts/Release/VST3/Axell Velvet.vst3
 -----------------------------------------------------------------
 Starting tests in: pluginval / Open plugin (cold)...
@@ -149,4 +148,3 @@ Completed tests in pluginval / Restoring default layout
 Starting tests in: pluginval / Fuzz parameters...
 Completed tests in pluginval / Fuzz parameters
 SUCCESS
-exit 0

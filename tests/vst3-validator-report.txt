@@ -15,7 +15,7 @@
 	name = Axell Velvet
 	category = Audio Module Class
 	subCategories = Fx|Dynamics|Distortion
-	version = 3.0.0
+	version = 3.0.1
 	sdkVersion = VST 3.8.0
 	cid = ABCDEF019182FAEB41787962566C7631
 
@@ -23,7 +23,7 @@
 	name = Axell Velvet
 	category = Component Controller Class
 	subCategories = Fx|Dynamics|Distortion
-	version = 3.0.0
+	version = 3.0.1
 	sdkVersion = VST 3.8.0
 	cid = ABCDEF011234ABCD41787962566C7631
 

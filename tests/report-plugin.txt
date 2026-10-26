@@ -1,4 +1,4 @@
-PASS  parameter count = 15
+PASS  parameter count = 16
 PASS  parameter index 0 is 'deessOn' (version hint 1)
 PASS  parameter index 1 is 'amount' (version hint 1)
 PASS  parameter index 2 is 'range' (version hint 1)
@@ -14,12 +14,15 @@ PASS  parameter index 11 is 'level' (version hint 1)
 PASS  parameter index 12 is 'output' (version hint 1)
 PASS  parameter index 13 is 'os' (version hint 1)
 PASS  parameter index 14 is 'lowcut' (version hint 1)
+PASS  parameter index 15 is 'deessMode' (version hint 3)
 PASS  defaults: de-ess 50 %, tape at drive 4, 16x, LEVEL 0 dB, listen off
 PASS  default LOW CUT 30 Hz (rumble only)
+PASS  default de-ess mode STUDIO
 PASS  state restore: all parameter values identical
 PASS  state restore: preset name restored
 PASS  state restore: restored instance renders bit-identical audio (max diff 0)
-PASS  state restore: latency = de-esser + 8x oversampling (754 samples)
+PASS  state restore: latency = LIVE de-esser (0) + 8x oversampling (82 samples)
+PASS  1.0 state (no De-Ess Mode): restores its values and the STUDIO de-esser
 PASS  raw-value state restore (pluginval scenario), 50 random rounds
 PASS  prepare: latency = de-esser + 16x (755)
 PASS  after switching to 4x: reported latency 751 = 751
@@ -27,9 +30,13 @@ PASS  after switching to 2x: reported latency 743 = 743
 PASS  after switching to 8x: reported latency 754 = 754
 PASS  after switching to 16x: reported latency 755 = 755
 PASS  every sample during the switches finite and in range
-PASS  programs: 25 factory presets (20 + 5 MY VOICE)
+PASS  LIVE, heat on: latency = 16x oversampler only (reported 83, expected 83)
+PASS  LIVE, heat off: latency 0 (reported 0, expected 0)
+PASS  back to STUDIO, heat off: de-esser + 16x (reported 755, expected 755)
+PASS  LIVE switches: every sample finite; LIVE + heat off is 0 samples
+PASS  programs: 28 factory presets (20 + 2 TRACKING + 6 MY VOICE)
 PASS  every program applies its values; factory presets keep LEVEL, MY VOICE presets set it
-PASS  5 MY VOICE presets set LEVEL
+PASS  6 MY VOICE presets set LEVEL
 PASS  'Init' program = all parameter defaults
 PASS  program change from another thread applies the values
 PASS  program change from another thread: name updated by the timer
@@ -45,8 +52,8 @@ PASS  LEARN: suggestion = -18 - integrated (-49.76 LUFS -> LEVEL 31.76 dB)
 PASS  LEARN: applied to LEVEL
 PASS  host bypass: dry output delayed by the reported latency (error 0)
 PASS  mono layout accepted
-PASS  mono: processes (peak 0.052)
+PASS  mono: processes (peak 0.057)
 PASS  editor: opens/closes 5x while processing (100 % size)
 PASS  editor: resizable 75-200 %, aspect locked
 PASS  editor: re-opens at the last used size (150 %)
-ALL PASS: 51 of 51 plugin checks passed
+ALL PASS: 58 of 58 plugin checks passed

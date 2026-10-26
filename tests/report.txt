@@ -471,13 +471,13 @@ PASS  DE-ESS level independence: reduction at -44 dB minus at -14 dB [LIVE] @ 19
 PASS  STUDIO <-> LIVE switches while playing: largest sample step re the input's [LIVE] @ 192.0 kHz             0.8753 x  [0 .. 1.5]
 PASS  STUDIO -> LIVE offline: impulse at the new latency (0) [LIVE] @ 192.0 kHz                                 0.0000 smp  [0 .. 0]
 PASS  no memory allocation in process() (switches, bypass, listen)                                              0.0000 allocs  [0 .. 0]
-PASS  CPU, 48 kHz stereo, mode 0 16x (% of one core)                                                            8.6088 %  [0 .. 12]
-PASS  CPU, 48 kHz stereo, mode 0 8x (% of one core)                                                             7.6417 %  [0 .. 9]
-PASS  CPU, 48 kHz stereo, mode 1 16x (% of one core)                                                            6.4543 %  [0 .. 12]
-PASS  CPU, 48 kHz stereo, mode 1 8x (% of one core)                                                             4.4120 %  [0 .. 9]
-PASS  CPU, 48 kHz stereo, mode 2 16x (% of one core)                                                            4.5956 %  [0 .. 12]
-PASS  CPU, 48 kHz stereo, mode 2 8x (% of one core)                                                             3.4786 %  [0 .. 9]
-ALL PASS: 467 of 467 checks passed (204.6 s)
+PASS  CPU, 48 kHz stereo, mode 0 16x (% of one core)                                                            8.6121 %  [0 .. 12]
+PASS  CPU, 48 kHz stereo, mode 0 8x (% of one core)                                                             7.6517 %  [0 .. 9]
+PASS  CPU, 48 kHz stereo, mode 1 16x (% of one core)                                                            6.4475 %  [0 .. 12]
+PASS  CPU, 48 kHz stereo, mode 1 8x (% of one core)                                                             4.3933 %  [0 .. 9]
+PASS  CPU, 48 kHz stereo, mode 2 16x (% of one core)                                                            4.5900 %  [0 .. 12]
+PASS  CPU, 48 kHz stereo, mode 2 8x (% of one core)                                                             3.4566 %  [0 .. 9]
+ALL PASS: 467 of 467 checks passed (205.3 s)
 PASS  parameter count = 16
 PASS  parameter index 0 is 'deessOn' (version hint 1)
 PASS  parameter index 1 is 'amount' (version hint 1)
