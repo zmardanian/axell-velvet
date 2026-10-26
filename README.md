@@ -1,5 +1,7 @@
 # Axell Velvet (VST3, Linux)
 
+[![CI](https://github.com/zmardanian/axell-velvet/actions/workflows/ci.yml/badge.svg)](https://github.com/zmardanian/axell-velvet/actions/workflows/ci.yml)
+
 The vocal plugin of the Axell suite: a de-esser that recognises sibilants instead of listening for loud treble, and
 three analog saturation models (tape, console, tube) to give a voice its signature warmth. The two are linked:
 S-GUARD keeps the warmth off the esses, so the saturation never makes them harsh again.
