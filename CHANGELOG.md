@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.2 - 2026-10-26
+- **Faster, bit-identical.** The pitch analysis inside the sibilance detector's pitch analysis (YIN's difference function) now computes eight lags at a time in registers on a straight copy of the window; every lag still adds its terms in the same order, so the output is byte-for-byte the same as 3.0.1 (checked on four of the artist's takes through the installed 3.0.1 and the new build). CPU at 48 kHz, 128-sample blocks: 8.94 -> 8.72 % of one core (-2.4 %).
+
 ## 3.0.1 - 2026-10-26
 - **Axell's Dojo look**: the family emblem, a brush-written title with Velvet's seal (絹, "silk"), a gold header rule
   and Velvet's own wine-coloured ground. The sound is unchanged (DSP identical to 3.0.0).

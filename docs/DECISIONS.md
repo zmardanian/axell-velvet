@@ -336,3 +336,16 @@ A project saved by 1.0 has no De-Ess Mode. Every parameter a saved state does no
 (STUDIO), whatever the instance was set to before - not the instance's current value. A 1.0 project therefore opens
 with the STUDIO de-esser and its saved settings (`tests/PluginTests.cpp`). The detector is 3.0's, so the de-essing is
 not bit-identical to 1.0 (V19, V21).
+
+## V24 - 3.0.2: faster pitch analysis, output byte-identical
+The artist's REAPER session dropped out at a 128-sample buffer with 20 Axell instances. Rule for the fix: no change to
+the sound at all, so every speed-up must give byte-identical output.
+- **Kept:** YIN's difference function (the sibilance/voice detector's pitch analysis, the hottest loop in the shared
+  core) computes eight lags at once in registers on a straight copy of the window. Each lag still adds its terms over
+  j in the original order, so every double is the same. Measured on four of the artist's takes, installed release vs
+  new build in pedalboard at 48 kHz / 128-sample blocks: output byte-identical; CPU Velvet 8.94 -> 8.72 % (-2.4 %); Velvet's cost is mostly its 16x oversampler and tape model.
+- **Rejected (bit-identical but slower or no faster):** the FFT butterfly rewritten with explicit real/imaginary
+  arithmetic (GCC already vectorises std::complex; slower), the loop interchange without register blocking (slower),
+  oversampler taps padded to a multiple of eight to drop the scalar tail (slower), AVX2 without FMA (no faster, and it
+  would drop older CPUs). FMA or -ffast-math were not considered: they change the output.
+

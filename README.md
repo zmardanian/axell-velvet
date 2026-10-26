@@ -119,16 +119,17 @@ what was tried and rejected, is in [docs/DECISIONS.md](docs/DECISIONS.md).
 | research | 2026-10-25 | A Romanian detector retrain and a de-plosive studied (DECISIONS V17, V18) | Neither beat what shipped (LOW CUT 90 handles pops on real takes): not adopted |
 | **3.0.0** | 2026-10-25 | Detector retrained on 111 voices (MFA labels); LIVE: causal detector + the cut made minimum phase per hop (real cepstrum), zero latency; 192 kHz verified; benchmark vs a third-party de-esser and the classic designs | Unseen accents F1 0.82, 97 % of sibilant energy caught; vowels changed 30-80x less than Sibalance at equal harsh-ess removal (LIVE 20-40x); the artist's takes: harsh esses left 16 -> 8 (LIVE 6); 467 DSP + 58 plugin checks, audit 54/54 |
 | **3.0.1** | 2026-10-26 | Axell's Dojo look (shared core brand title, per-plugin ground) | DSP identical; the same suites, ASan clean, pluginval L10, validator 47/47 |
+| **3.0.2** | 2026-10-26 | Faster pitch analysis in the shared core (the sibilance detector's pitch analysis): eight lags in registers, same summation order | Output byte-identical to 3.0.1; CPU 8.94 -> 8.72 % of one core (-2.4 %) |
 
 Every design decision with its measurement: [docs/DECISIONS.md](docs/DECISIONS.md); all changes: [CHANGELOG.md](CHANGELOG.md).
 
 ## Install (Linux)
 
-Download `AxellVelvet-3.0.1-linux-x86_64.tar.gz` from the
+Download `AxellVelvet-3.0.2-linux-x86_64.tar.gz` from the
 [latest release](https://github.com/zmardanian/axell-velvet/releases/latest) (optional: `sha256sum -c SHA256SUMS.txt`), then:
 
-    tar xzf AxellVelvet-3.0.1-linux-x86_64.tar.gz
-    cd AxellVelvet-3.0.1-linux-x86_64
+    tar xzf AxellVelvet-3.0.2-linux-x86_64.tar.gz
+    cd AxellVelvet-3.0.2-linux-x86_64
     ./install.sh
 
 The installer copies `Axell Velvet.vst3` to `~/.vst3`. Then in REAPER: Options > Preferences > Plug-ins > VST >
