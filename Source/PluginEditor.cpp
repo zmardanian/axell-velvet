@@ -442,7 +442,9 @@ void VelvetEditor::Content::paint (juce::Graphics& g)
     axell::brand::drawHeaderRule (g, (float) e.headerArea.getBottom() - 1.0f, 0.0f, (float) vui::kWidth, col::grid);
     // Axell's Dojo: the family emblem, its wave and dot in Velvet's teal
     axell::brand::drawEmblem (g, { 12.0f, 6.0f, 46.0f, 46.0f }, col::teal);
-    axell::brand::drawTitle (g, 68.0f, 28.0f, "Velvet", juce::String (juce::CharPointer_UTF8 ("\xe7\xb5\xb9"))); // 絹
+    axell::brand::drawVersion (g, axell::brand::drawTitle (g, 68.0f, 28.0f, "Velvet",
+                                                               juce::String (juce::CharPointer_UTF8 ("\xe7\xb5\xb9"))), // 絹
+                               28.0f, AXELL_VERSION_STRING);
     g.setFont (ui::caps (10.0f, 1));
     g.setColour (col::dim);
     g.drawText ("SMART DE-ESSER  +  ANALOG HEAT", 67, 37, 320, 14, Justification::centredLeft);

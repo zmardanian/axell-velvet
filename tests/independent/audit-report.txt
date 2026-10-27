@@ -53,4 +53,4 @@ PASS  LIVE DE-ESS 75 %: sibilant 2.5-12 kHz energy reduced, within 2 dB of STUDI
 PASS  LIVE DE-ESS 75 %: worst change on a vowel @ 192000: -88.6 dB re the vowel (limit -50)
 PASS  LIVE DE-ESS LISTEN: what is removed + what remains = the input @ 192000: max error 7.5e-09
 
-ALL PASS: 54 of 54 independent checks passed (38 s)
+ALL PASS: 54 of 54 independent checks passed (37 s)
