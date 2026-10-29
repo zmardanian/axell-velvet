@@ -1,6 +1,6 @@
 * Loading module...
 
-	/var/home/Alex/axell-velvet/build/AxellVelvet_artefacts/Release/VST3/Axell Velvet.vst3
+	~/axell-velvet/build/AxellVelvet_artefacts/Release/VST3/Axell Velvet.vst3
 
 * Check valid bundle structure...
 
