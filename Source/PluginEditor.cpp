@@ -317,7 +317,7 @@ VelvetEditor::VelvetEditor (VelvetProcessor& p) : AudioProcessorEditor (&p), pro
     slotB.onClick = [this] { proc.selectSlot (1); };
     slotCopy.onClick = [this] { proc.copyActiveToOther(); };
     presetName.setTooltip ("Presets by vocal style, plus the MY VOICE set made for Axell's voice and recording chain. Factory "
-                           "presets keep your LEVEL. Your own presets live in ~/.local/share/AxellVelvet/Presets.");
+                           "presets keep your LEVEL. Your own presets live in " AXELL_PRESETS_PATH ("AxellVelvet") ".");
     slotA.setTooltip ("A/B: two complete settings to compare.");
     slotB.setTooltip ("A/B: two complete settings to compare.");
     slotCopy.setTooltip ("Copy the current slot to the other one.");
