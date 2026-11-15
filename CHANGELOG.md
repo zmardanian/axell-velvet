@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.4 - 2026-11-15
+- **Lighter, the same sound** (a suite-wide optimisation; the rule: byte-for-byte the same output). The neural
+  de-esser's sibilance detector takes one logarithm per frame instead of 192, and the shared FFT multiplies complex
+  numbers inline.
+- Output byte-for-byte the same as 3.0.3: 138 renders through the released 3.0.3 and the new build (all 28 factory
+  presets and 40 random settings of every parameter, on a vocal and a mix).
+- CPU at 48 kHz (DSP suite benchmark): every mode 3-9 % lighter, e.g. mode 1 at 8x 4.24 -> 3.95 % of one core,
+  mode 2 at 8x 3.32 -> 3.02 %; plugin process time over the 138 renders -7 to -10 % (two runs).
+- Verified: DSP 467 + plugin 58 checks (ASan + UBSan clean), independent audit 54/54, core 143/143, pluginval
+  strictness 10 (+10 extra runs, 0 crashes), VST3 validator 47/47.
+
 ## 3.0.3 - 2026-10-27
 - **Version on the interface**: the plugin's version, small and quiet after the title - so you can always see which build is loaded. The audio is byte-for-byte the same as 3.0.2 (checked through the released 3.0.2 and the new build).
 

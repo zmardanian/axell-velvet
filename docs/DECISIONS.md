@@ -349,3 +349,12 @@ the sound at all, so every speed-up must give byte-identical output.
   oversampler taps padded to a multiple of eight to drop the scalar tail (slower), AVX2 without FMA (no faster, and it
   would drop older CPUs). FMA or -ffast-math were not considered: they change the output.
 
+
+## V25 - 3.0.4: the same sound, less work
+Part of the suite-wide optimisation campaign (profile of a 60 s vocal: heat models 27 %, de-esser + detector 25 %,
+oversampler 30 %). Rule: byte-identical output.
+- **Kept (axell-core D1):** the detector's spectral flatness from one log of a mantissa product instead of one log
+  per bin. **Kept (axell-core V1):** complex products written out in the FFT (-1.1 % alone).
+- **Verified:** 138 renders vs the released 3.0.3 (28 presets + 40 seeded random settings, vocal + mix):
+  byte-identical; plugin process time -7 to -10 %; DSP benchmark 3-9 % lower in every mode.
+- **Rejected by measurement:** AVX2 dispatch of the oversampler (slower at 2x-8x), FMA (changes the output).

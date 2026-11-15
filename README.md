@@ -132,16 +132,17 @@ what was tried and rejected, is in [docs/DECISIONS.md](docs/DECISIONS.md).
 | **3.0.1** | 2026-10-26 | Axell's Dojo look (shared core brand title, per-plugin ground) | DSP identical; the same suites, ASan clean, pluginval L10, validator 47/47 |
 | **3.0.2** | 2026-10-26 | Faster pitch analysis in the shared core (the sibilance detector's pitch analysis): eight lags in registers, same summation order | Output byte-identical to 3.0.1; CPU 8.94 -> 8.72 % of one core (-2.4 %) |
 | **3.0.3** | 2026-10-27 | The version on the interface (small and quiet after the title) | Audio byte-identical to 3.0.2 |
+| **3.0.4** | 2026-11-15 | Faster shared core (detector flatness: one log per frame; inline FFT products) | Output byte-identical to 3.0.3 (138 renders: 28 presets + 40 random settings); CPU 3-9 % lower in every mode, plugin process time -7 to -10 % |
 
 Every design decision with its measurement: [docs/DECISIONS.md](docs/DECISIONS.md); all changes: [CHANGELOG.md](CHANGELOG.md).
 
 ## Install (Linux)
 
-Download `AxellVelvet-3.0.3-linux-x86_64.tar.gz` from the
+Download `AxellVelvet-3.0.4-linux-x86_64.tar.gz` from the
 [latest release](https://github.com/zmardanian/axell-velvet/releases/latest) (optional: `sha256sum -c SHA256SUMS.txt`), then:
 
-    tar xzf AxellVelvet-3.0.3-linux-x86_64.tar.gz
-    cd AxellVelvet-3.0.3-linux-x86_64
+    tar xzf AxellVelvet-3.0.4-linux-x86_64.tar.gz
+    cd AxellVelvet-3.0.4-linux-x86_64
     ./install.sh
 
 The installer copies `Axell Velvet.vst3` to `~/.vst3`. Then in REAPER: Options > Preferences > Plug-ins > VST >
