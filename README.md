@@ -1,46 +1,65 @@
-# Axell Velvet (VST3, Linux + Windows)
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/hero-dark.png">
+  <img alt="Axell Velvet - Silk on your esses. Warmth everywhere else." src="docs/img/type/hero-light.png" width="720">
+</picture>
+</p>
 
-[![CI](https://github.com/zmardanian/axell-velvet/actions/workflows/ci.yml/badge.svg)](https://github.com/zmardanian/axell-velvet/actions/workflows/ci.yml)
-<!-- badges -->
-[![Latest release](https://img.shields.io/github/v/release/zmardanian/axell-velvet?style=flat-square&label=release&color=9c7434)](https://github.com/zmardanian/axell-velvet/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/zmardanian/axell-velvet/total?style=flat-square&color=2a1f17)](https://github.com/zmardanian/axell-velvet/releases)
-![Linux + Windows](https://img.shields.io/badge/Linux%20%2B%20Windows-x86__64-2a1f17?style=flat-square)
-![VST3](https://img.shields.io/badge/format-VST3-2a1f17?style=flat-square)
-[![Licence AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-6b5a4a?style=flat-square)](LICENSE)
-<!-- /badges -->
+<p align="center">
+  <a href="https://github.com/zmardanian/axell-velvet/releases/latest"><img src="https://img.shields.io/github/v/release/zmardanian/axell-velvet?style=flat-square&label=release&color=a3486a" alt="latest release"></a>
+  <a href="https://github.com/zmardanian/axell-velvet/releases"><img src="https://img.shields.io/github/downloads/zmardanian/axell-velvet/total?style=flat-square&color=2a1f17" alt="downloads"></a>
+  <img src="https://img.shields.io/badge/Windows%20%C2%B7%20Linux-x86__64-2a1f17?style=flat-square" alt="Windows and Linux">
+  <a href="https://github.com/zmardanian/axell-velvet/actions/workflows/ci.yml"><img src="https://github.com/zmardanian/axell-velvet/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/licence-AGPL--3.0-6b5a4a?style=flat-square" alt="AGPL-3.0">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/velvet-100pct-hidpi2x.png" alt="Axell Velvet" width="100%">
+</p>
+
+<p align="center">
+  <b>A de-esser that recognises an S instead of listening for loud treble.</b><br>
+  Trained on 111 voices, it cuts the harsh esses and leaves everything else alone - and three analog warmth models give the voice its glow, with S-GUARD keeping the warmth off the esses.
+</p>
+
+<p align="center">
+  <a href="https://github.com/zmardanian/axell-velvet/releases/latest"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/dl-windows-dark.png">
+  <img alt="Download for Windows" src="docs/img/type/dl-windows-light.png" height="58">
+</picture></a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/zmardanian/axell-velvet/releases/latest"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/dl-linux-dark.png">
+  <img alt="Download for Linux" src="docs/img/type/dl-linux-light.png" height="58">
+</picture></a>
+</p>
+
+<p align="center"><sub>Free and open source (AGPL-3.0)  ·  Windows 10 / 11 and Linux  ·  any VST3 host - FL Studio, Ableton Live, Cubase, Studio One, Bitwig, REAPER</sub></p>
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-why-dark.png">
+  <img alt="01 Why it's different - Silk, not surgery." src="docs/img/type/h-why-light.png" height="68">
+</picture>
+
+- **30-80x gentler on your vowels** - than a respected sibilance-aware de-esser, at equal harsh-ess removal, on 15 voices it never trained on.
+- **Trained on 111 voices** - and it hears accents it has never met: F1 0.82 on 12 unseen accents.
+- **Zero latency when you record** - the LIVE de-esser is causal - with HEAT off, Velvet adds no latency at all.
+- **Warmth that stays clean** - aliasing at equal saturation: tape -108, console -129, tube -113 dBc - certified UADx plugins measured -70 to -96.
+- **3-9 % lighter in 3.0.4** - byte-for-byte the same sound.
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-does-dark.png">
+  <img alt="02 What it does - What it does." src="docs/img/type/h-does-light.png" height="68">
+</picture>
 
 The vocal plugin of the Axell suite: a de-esser that recognises sibilants instead of listening for loud treble, and
 three analog saturation models (tape, console, tube) to give a voice its signature warmth. The two are linked:
 S-GUARD keeps the warmth off the esses, so the saturation never makes them harsh again.
-
-> **Part of Axell's Dojo** - the Axell Signature suite for rap vocals, beats and masters, on Linux and Windows:
-> [Penta EQ](https://github.com/zmardanian/axell-penta-eq) ·
-> [Duo Compressor](https://github.com/zmardanian/axell-duo-compressor) ·
-> [Gate](https://github.com/zmardanian/axell-gate) · [De-Reverb](https://github.com/zmardanian/axell-dereverb) ·
-> **Velvet** · [Master](https://github.com/zmardanian/axell-master) ·
-> [Space](https://github.com/zmardanian/axell-space) ·
-> [Forbidden Seal](https://github.com/zmardanian/axell-forbidden-seal) ·
-> [Axell 76](https://github.com/zmardanian/axell-76)
-> Installed, updated and tuned to your voice by the [Axell Signature Dojo](https://github.com/zmardanian/axell-signature-dojo)
-> (one Windows installer carries the whole suite). The plugins share one core library (`external/axell-core`):
-> a breakthrough in one plugin becomes a feature of the next.
-
-![Axell Velvet](docs/screenshots/velvet-100pct.png)
-
-## What's new in 3.0
-
-- **3.0.0 - LIVE de-esser, zero latency**, for recording while you hear yourself through the plugin: its own causal
-  detector network and the same cut made minimum phase every 2 ms. With HEAT off Velvet adds no latency at all.
-- **3.0.0 - the detector trained on 111 voices** instead of three (CMU ARCTIC + 108 VCTK voices, forced-aligned
-  labels): on 12 accents it never heard F1 0.82 (1.0: 0.72); on the artist's own takes half as many harsh esses left
-  uncut. Against a third-party sibilance-aware de-esser on 15 unseen voices: 30-80x less change on vowels at equal
-  harsh-ess removal.
-- **3.0.1 - Axell's Dojo look**: the family emblem, a brush-written title with Velvet's seal (絹, "silk"), a wine
-  ground. The sound is identical to 3.0.0.
-- **Shared with the suite**: Velvet's detector networks and its zero-latency minimum-phase method live in the shared
-  core - Axell Gate 3.0's second network, Penta EQ 3.0's Ess source and De-Reverb 3.0's LIVE mode are built on them.
-
-## What it does
 
 **DE-ESS** is a one-knob de-esser. **AMOUNT** sets how far the esses come down. There is no threshold: the same
 setting works on a quiet verse and a loud chorus, at any recording level.
@@ -93,7 +112,36 @@ There are 28 factory presets in six groups:
   interface preamp with a FET compressor), one of them for tracking. They also set LEVEL and a 90 Hz low cut for
   that chain.
 
-## Measured quality
+<table>
+<tr><td align="center" width="50%"><img src="docs/screenshots/velvet-console.png" alt="HEAT: console" width="100%"><br><sub>HEAT: console</sub></td><td align="center" width="50%"><img src="docs/screenshots/velvet-tube.png" alt="HEAT: tube" width="100%"><br><sub>HEAT: tube</sub></td></tr>
+</table>
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-new-dark.png">
+  <img alt="03 What's new - New in 3.0." src="docs/img/type/h-new-light.png" height="68">
+</picture>
+
+- **3.0.0 - LIVE de-esser, zero latency**, for recording while you hear yourself through the plugin: its own causal
+  detector network and the same cut made minimum phase every 2 ms. With HEAT off Velvet adds no latency at all.
+- **3.0.0 - the detector trained on 111 voices** instead of three (CMU ARCTIC + 108 VCTK voices, forced-aligned
+  labels): on 12 accents it never heard F1 0.82 (1.0: 0.72); on the artist's own takes half as many harsh esses left
+  uncut. Against a third-party sibilance-aware de-esser on 15 unseen voices: 30-80x less change on vowels at equal
+  harsh-ess removal.
+- **3.0.1 - Axell's Dojo look**: the family emblem, a brush-written title with Velvet's seal (絹, "silk"), a wine
+  ground. The sound is identical to 3.0.0.
+- **Shared with the suite**: Velvet's detector networks and its zero-latency minimum-phase method live in the shared
+  core - Axell Gate 3.0's second network, Penta EQ 3.0's Ess source and De-Reverb 3.0's LIVE mode are built on them.
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-measured-dark.png">
+  <img alt="04 Measured - Every claim, measured." src="docs/img/type/h-measured-light.png" height="68">
+</picture>
 
 | | |
 |---|---|
@@ -108,7 +156,7 @@ There are 28 factory presets in six groups:
 | HEAT aliasing at equal saturation (3 % THD) vs certified UAD plugins | Velvet tape -108 / console -129 / tube -113 dBc; UADx Oxide -96, 610-B -89, Century -79, 610-A -70 dBc |
 | Auto gain | small-signal gain 0 ± 0.25 dB in every model; every preset keeps the vocal's level within 0.5 dB |
 | Latency | STUDIO 755 samples at 48 kHz (15.7 ms; the de-esser's look-ahead); LIVE 83 (1.7 ms, the HEAT oversampler) or 0 with HEAT off; reported exactly, changes only after the host was told |
-| CPU (48 kHz stereo, one core, 16x) | tape ≈ 8-10 %, console ≈ 6 %, tube ≈ 5 % (8x: 8 / 4 / 3.4 %) |
+| CPU (48 kHz stereo, one core, 16x) | tape ≈ 8 %, console ≈ 6 %, tube ≈ 4 % (8x: 7.2 / 4.0 / 3.0 %) (3.0.4) |
 | Real-time safety | no allocation, lock or I/O in the audio path (allocation counter in the test suite) |
 
 All of these come from:
@@ -122,36 +170,18 @@ All of these come from:
 The benchmarks are in `research/` (`bench3.py`, `realtakes3.py`, `bench_cpp.py`, `uad_bench.py`). The reasoning behind every design choice, with
 what was tried and rejected, is in [docs/DECISIONS.md](docs/DECISIONS.md).
 
-## Engineering progress
 
-| Version | Date | Engineering | Measured |
-|---|---|---|---|
-| **1.0.0** | 2026-10-15 | A neural sibilance detector (19 inputs, 32 hidden; trained on the shipping C++ features of 3 ARCTIC voices) driving a water-filling cut in ten complementary linear-phase bands; HEAT: tape (Jiles-Atherton hysteresis), console, tube models with matched harmonics; S-GUARD; LEARN; 25 presets | Bit-exact when there is nothing to cut; aliasing <= -95 dBc at full drive (16x); held-out voices: F1 0.72 |
-| research | 2026-10-25 | A Romanian detector retrain and a de-plosive studied (DECISIONS V17, V18) | Neither beat what shipped (LOW CUT 90 handles pops on real takes): not adopted |
-| **3.0.0** | 2026-10-25 | Detector retrained on 111 voices (MFA labels); LIVE: causal detector + the cut made minimum phase per hop (real cepstrum), zero latency; 192 kHz verified; benchmark vs a third-party de-esser and the classic designs | Unseen accents F1 0.82, 97 % of sibilant energy caught; vowels changed 30-80x less than Sibalance at equal harsh-ess removal (LIVE 20-40x); the artist's takes: harsh esses left 16 -> 8 (LIVE 6); 467 DSP + 58 plugin checks, audit 54/54 |
-| **3.0.1** | 2026-10-26 | Axell's Dojo look (shared core brand title, per-plugin ground) | DSP identical; the same suites, ASan clean, pluginval L10, validator 47/47 |
-| **3.0.2** | 2026-10-26 | Faster pitch analysis in the shared core (the sibilance detector's pitch analysis): eight lags in registers, same summation order | Output byte-identical to 3.0.1; CPU 8.94 -> 8.72 % of one core (-2.4 %) |
-| **3.0.3** | 2026-10-27 | The version on the interface (small and quiet after the title) | Audio byte-identical to 3.0.2 |
-| **3.0.4** | 2026-11-15 | Faster shared core (detector flatness: one log per frame; inline FFT products) | Output byte-identical to 3.0.3 (138 renders: 28 presets + 40 random settings); CPU 3-9 % lower in every mode, plugin process time -7 to -10 % |
+<br>
 
-Every design decision with its measurement: [docs/DECISIONS.md](docs/DECISIONS.md); all changes: [CHANGELOG.md](CHANGELOG.md).
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-install-dark.png">
+  <img alt="05 Get it - Windows first. Linux too." src="docs/img/type/h-install-light.png" height="68">
+</picture>
 
-## Install (Linux)
+### Windows
 
-Download `AxellVelvet-3.0.4-linux-x86_64.tar.gz` from the
-[latest release](https://github.com/zmardanian/axell-velvet/releases/latest) (optional: `sha256sum -c SHA256SUMS.txt`), then:
-
-    tar xzf AxellVelvet-3.0.4-linux-x86_64.tar.gz
-    cd AxellVelvet-3.0.4-linux-x86_64
-    ./install.sh
-
-The installer copies `Axell Velvet.vst3` to `~/.vst3`. Then in REAPER: Options > Preferences > Plug-ins > VST >
-Re-scan. Put it on the vocal track, after pitch correction and before the compressor (or after it: the de-esser
-does not depend on level). Or let the [Axell Signature Dojo](https://github.com/zmardanian/axell-signature-dojo)
-install and update it.
-
-
-## Install (Windows)
+> [!TIP]
+> **The whole suite in one go:** the [Axell Signature Suite installer](https://github.com/zmardanian/axell-signature-dojo/releases/latest) puts every Axell plugin and the Dojo on Windows 10 / 11 in one step, each one optional - and the Dojo keeps them up to date. Every VST3 host loads them: FL Studio, Ableton Live, Cubase, Studio One, Bitwig, REAPER.
 
 Windows 10 / 11, 64-bit. Download `AxellVelvet-<version>-windows-x64.tar.gz` from the
 [latest release](https://github.com/zmardanian/axell-velvet/releases/latest) (optional: check it against `SHA256SUMS.txt`),
@@ -166,7 +196,94 @@ Every Windows build is made by GitHub Actions from this repository, passes the s
 (strictness 10) as the Linux build, and is checked to sound the same as it (largest difference far below -90 dBFS,
 most often bit-identical). The plugin is not code-signed yet; DAWs load it directly.
 
-## Build (Bazzite / any Linux, inside a distrobox)
+### Linux
+
+Download `AxellVelvet-3.0.4-linux-x86_64.tar.gz` from the
+[latest release](https://github.com/zmardanian/axell-velvet/releases/latest) (optional: `sha256sum -c SHA256SUMS.txt`), then:
+
+    tar xzf AxellVelvet-3.0.4-linux-x86_64.tar.gz
+    cd AxellVelvet-3.0.4-linux-x86_64
+    ./install.sh
+
+The installer copies `Axell Velvet.vst3` to `~/.vst3`. Then in REAPER: Options > Preferences > Plug-ins > VST >
+Re-scan. Put it on the vocal track, after pitch correction and before the compressor (or after it: the de-esser
+does not depend on level). Or let the [Axell Signature Dojo](https://github.com/zmardanian/axell-signature-dojo)
+install and update it.
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-history-dark.png">
+  <img alt="06 Version history - Every version, earned." src="docs/img/type/h-history-light.png" height="68">
+</picture>
+
+| Version | Date | Engineering | Measured |
+|---|---|---|---|
+| **1.0.0** | 2026-10-15 | A neural sibilance detector (19 inputs, 32 hidden; trained on the shipping C++ features of 3 ARCTIC voices) driving a water-filling cut in ten complementary linear-phase bands; HEAT: tape (Jiles-Atherton hysteresis), console, tube models with matched harmonics; S-GUARD; LEARN; 25 presets | Bit-exact when there is nothing to cut; aliasing <= -95 dBc at full drive (16x); held-out voices: F1 0.72 |
+| research | 2026-10-25 | A Romanian detector retrain and a de-plosive studied (DECISIONS V17, V18) | Neither beat what shipped (LOW CUT 90 handles pops on real takes): not adopted |
+| **3.0.0** | 2026-10-25 | Detector retrained on 111 voices (MFA labels); LIVE: causal detector + the cut made minimum phase per hop (real cepstrum), zero latency; 192 kHz verified; benchmark vs a third-party de-esser and the classic designs | Unseen accents F1 0.82, 97 % of sibilant energy caught; vowels changed 30-80x less than Sibalance at equal harsh-ess removal (LIVE 20-40x); the artist's takes: harsh esses left 16 -> 8 (LIVE 6); 467 DSP + 58 plugin checks, audit 54/54 |
+| **3.0.1** | 2026-10-26 | Axell's Dojo look (shared core brand title, per-plugin ground) | DSP identical; the same suites, ASan clean, pluginval L10, validator 47/47 |
+| **3.0.2** | 2026-10-26 | Faster pitch analysis in the shared core (the sibilance detector's pitch analysis): eight lags in registers, same summation order | Output byte-identical to 3.0.1; CPU 8.94 -> 8.72 % of one core (-2.4 %) |
+| **3.0.3** | 2026-10-27 | The version on the interface (small and quiet after the title) | Audio byte-identical to 3.0.2 |
+| **3.0.4** | 2026-11-15 | Faster shared core (detector flatness: one log per frame; inline FFT products) | Output byte-identical to 3.0.3 (138 renders: 28 presets + 40 random settings); CPU 3-9 % lower in every mode, plugin process time -7 to -10 % |
+
+Every design decision with its measurement: [docs/DECISIONS.md](docs/DECISIONS.md); all changes: [CHANGELOG.md](CHANGELOG.md).
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-suite-dark.png">
+  <img alt="07 The suite - Nine plugins, one core." src="docs/img/type/h-suite-light.png" height="68">
+</picture>
+
+<p align="center">
+<table>
+<tr><td align="center"><a href="https://github.com/zmardanian/axell-penta-eq"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/penta-eq-dark.png">
+  <img alt="Penta EQ" src="docs/img/suite/penta-eq-light.png" width="120">
+</picture></a><br><sub>analog-matched EQ</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-duo-compressor"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/duo-compressor-dark.png">
+  <img alt="Duo Compressor" src="docs/img/suite/duo-compressor-light.png" width="120">
+</picture></a><br><sub>FET + opto + limiter</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-gate"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/gate-dark.png">
+  <img alt="Gate" src="docs/img/suite/gate-light.png" width="120">
+</picture></a><br><sub>voice-aware gate</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-dereverb"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/dereverb-dark.png">
+  <img alt="De-Reverb" src="docs/img/suite/dereverb-light.png" width="120">
+</picture></a><br><sub>small-room de-reverb</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-velvet"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/velvet-dark.png">
+  <img alt="Velvet" src="docs/img/suite/velvet-light.png" width="120">
+</picture></a><br><sub>neural de-esser + warmth</sub></td></tr>
+<tr><td align="center"><a href="https://github.com/zmardanian/axell-master"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/master-dark.png">
+  <img alt="Master" src="docs/img/suite/master-light.png" width="120">
+</picture></a><br><sub>mastering limiter</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-space"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/space-dark.png">
+  <img alt="Space" src="docs/img/suite/space-light.png" width="120">
+</picture></a><br><sub>vocal reverb + delay</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-forbidden-seal"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/forbidden-seal-dark.png">
+  <img alt="Forbidden Seal" src="docs/img/suite/forbidden-seal-light.png" width="120">
+</picture></a><br><sub>saturation</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-76"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/76-dark.png">
+  <img alt="76" src="docs/img/suite/76-light.png" width="120">
+</picture></a><br><sub>1176 FET compressor</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-signature-dojo"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/signature-dojo-dark.png">
+  <img alt="Signature Dojo" src="docs/img/suite/signature-dojo-light.png" width="120">
+</picture></a><br><sub>the suite's home</sub></td></tr>
+</table>
+</p>
+
+Nine plugins and their home, built as one family: they share a core library, so a breakthrough in one becomes a feature of the next - the sibilance network of Velvet guards the esses in Duo, Master, Space and Forbidden Seal; Gate's voice detector holds Duo's and Master's gain through your pauses. The [Axell Signature Dojo](https://github.com/zmardanian/axell-signature-dojo) installs, updates and tunes the whole suite to your voice - on Windows from a single installer.
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-build-dark.png">
+  <img alt="08 Build from source - For developers." src="docs/img/type/h-build-light.png" height="68">
+</picture>
 
     bash scripts/setup-toolbox.sh      # creates the juce-build distrobox (Ubuntu 24.04) once
     bash scripts/build.sh
@@ -180,9 +297,18 @@ most often bit-identical). The plugin is not code-signed yet; DAWs load it direc
 - The detector's weights (`Source/DetectorModel.h`) are generated by `research/train_cpp.py` from the features of the
   shipping C++ code (`tools/VelvetFeatures.cpp`).
 
-## Contact
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-credits-dark.png">
+  <img alt="09 Credits & contact - Credits & contact." src="docs/img/type/h-credits-light.png" height="68">
+</picture>
 
 Axell Yobag - axellpetre@protonmail.com (questions, bug reports, feedback). Issues on GitHub are welcome too.
 
 Licence: GNU AGPLv3 (`LICENSE`); third-party components and the CMU ARCTIC and VCTK notices (training data of the
 detectors) in `THIRD_PARTY_NOTICES.md`. No code, data or graphics of any commercial product are used.
+
+
+<br>
