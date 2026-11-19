@@ -311,7 +311,7 @@ Nine plugins and their home, built as one family: they share a core library, so 
 **Free forever, kept alive by you.** Axell Velvet costs nothing and never will - no subscriptions, no licence keys. If it has earned a place in your mixes, you can [support the Dojo on Ko-fi](https://ko-fi.com/axellyobag) - one-time or monthly, from €3.
 
 
-Axell Yobag - axellpetre@protonmail.com (questions, bug reports, feedback). Issues on GitHub are welcome too.
+Axell Yobag - contact@axellsdojo.com (questions, bug reports, feedback). Issues on GitHub are welcome too.
 
 Licence: GNU AGPLv3 (`LICENSE`); third-party components and the CMU ARCTIC and VCTK notices (training data of the
 detectors) in `THIRD_PARTY_NOTICES.md`. No code, data or graphics of any commercial product are used.
