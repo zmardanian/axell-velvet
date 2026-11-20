@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(AxellVelvet VERSION 3.0.4)
+project(AxellVelvet VERSION 3.0.5)
 # Windows (MSVC): static runtime (no VC++ redistributable needed), M_PI, UTF-8 sources; GCC-style flags elsewhere only
 if(MSVC)
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

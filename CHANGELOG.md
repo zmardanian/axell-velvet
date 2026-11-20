@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.0.5 - 2026-11-20
+- **The name in the suite's script wordmark.** The title now reads "Axell Velvet" in Great Vibes, in the plugin's own
+  colour - the same wordmark as axellsdojo.com and the READMEs (SIL Open Font License; credited in THIRD_PARTY_NOTICES.md).
+- **Your DAW's preset menu shows the right factory preset after a project is reopened.** The chosen preset (the
+  host's "Program") is now saved with the project and read back without re-applying it, so your settings stay exactly
+  as you left them. Before, the sound was always right but the menu could show the first preset.
+- **Every control has a name for screen readers** (Windows Narrator, macOS VoiceOver): knobs, switches and menus announce
+  their parameter instead of just "slider".
+- **Linux: runs on Ubuntu 22.04+, Debian 12+, Linux Mint 21+ and Fedora 36+** (built on Ubuntu 22.04).
+- The audio is byte-for-byte the same as 3.0.4 (138 renders through the released 3.0.4 and the new build: every
+  factory preset and 40 random settings of every parameter, on a vocal and a mix). Verified with pluginval 2.0 at
+  strictness 10 with its real-time check: no memory allocation while processing audio.
+
 ## 3.0.4 - 2026-11-15
 - **Lighter, the same sound** (a suite-wide optimisation; the rule: byte-for-byte the same output). The neural
   de-esser's sibilance detector takes one logarithm per frame instead of 192, and the shared FFT multiplies complex
